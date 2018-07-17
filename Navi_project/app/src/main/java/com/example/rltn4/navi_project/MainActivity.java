@@ -8,17 +8,21 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
+    Button preview_btn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button button1 = (Button) findViewById(R.id.button1);
-        button1.setOnClickListener(new View.OnClickListener() {
+        preview_btn = (Button)findViewById(R.id.preview);
+        preview_btn.setOnClickListener(new View.OnClickListener(){
+
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-                startActivityForResult(intent, 101);
+                Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }
