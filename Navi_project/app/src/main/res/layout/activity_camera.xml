@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,7 +15,13 @@
             android:layout_height="match_parent"
             android:visibility="visible" />
     </FrameLayout>
-
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:id="@+id/percent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminateOnly="false"
+        android:max="100"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
