@@ -32,8 +32,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         percent_proBar.setMax(100);
         percent_proBar.setProgress(80);
 
-        Button button2 = (Button) findViewById(R.id.button2);
-        button2.setOnClickListener(new View.OnClickListener() {
+        Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
