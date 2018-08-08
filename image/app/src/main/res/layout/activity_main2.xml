@@ -21,8 +21,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.5"
-            android:background="@android:color/holo_blue_bright"
+            android:layout_weight="1.7"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -72,6 +71,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
+                    android:onClick="onSwitchButtonClicked"
                     android:scaleType="centerInside"
                     app:srcCompat="@drawable/swap" />
 
@@ -92,62 +92,14 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="8">
+            android:layout_weight="8"
+            android:fillViewport="true">
 
-            <LinearLayout
+            <ListView
+                android:id="@+id/ListView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="8.5"
-                android:orientation="vertical">
-
-                <TableLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <ImageView
-                            android:id="@+id/imageView2"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:scaleType="centerInside"
-                            app:srcCompat="@drawable/walking" />
-
-                        <TextView
-                            android:id="@+id/textView"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="10"
-                            android:text="중앙대학교 -> 남도학숙"
-                            android:textSize="25dp" />
-                    </TableRow>
-
-                    <TableRow
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <ImageView
-                            android:id="@+id/imageView"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:scaleType="centerInside"
-                            app:srcCompat="@drawable/walking" />
-
-                        <TextView
-                            android:id="@+id/textView2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="10"
-                            android:text="중앙대학교 -> 남도학숙"
-                            android:textSize="25dp" />
-                    </TableRow>
-
-                </TableLayout>
-            </LinearLayout>
+                android:fastScrollEnabled="true" />
         </ScrollView>
 
     </LinearLayout>
