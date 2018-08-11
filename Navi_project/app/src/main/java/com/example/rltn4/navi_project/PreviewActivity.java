@@ -33,7 +33,6 @@ public class PreviewActivity extends AppCompatActivity implements OnMapReadyCall
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
                 startActivity(intent);
-                finish();
             }
         });
     }

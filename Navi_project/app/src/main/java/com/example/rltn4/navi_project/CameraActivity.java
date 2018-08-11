@@ -16,9 +16,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -32,12 +35,14 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     int APIVersion = Build.VERSION.SDK_INT;
     android.hardware.Camera mcamera;
     ProgressBar percent_proBar;
+    ImageView arrow_img;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
 
+        // 안드로이드 api 버전 높으면 접근권한 받기
         if (APIVersion >= android.os.Build.VERSION_CODES.M) {
             if (checkCAMERAPermission()) {
                 mcamera = android.hardware.Camera.open();
@@ -46,17 +51,23 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             }
         }
 
+        //surfaceview 생성 및 가로로 설정
         surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         surfaceCreated(surfaceHolder);
 
+        // 이미지뷰 설정
+        arrow_img = (ImageView)findViewById(R.id.arrow);
+
+        //프로그래스바 생성 및 max, 현재 상황 표시
         percent_proBar = (ProgressBar)findViewById(R.id.percent);
         percent_proBar.setIndeterminate(false);
         percent_proBar.setMax(100);
         percent_proBar.setProgress(80);
 
+        //모드 변경 버튼
         Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,7 +77,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             }
         });
 
+        //메시지로 안내
         TextView textview = findViewById(R.id.text);
+        textview.setText("우회전");
         textview.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -89,8 +102,26 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 builder.show();
             }
         });
+
+        // textview 메세지에 따라 화살표 변경 추후에 메세지 변경하는 함수에 넣어서 호출
+        changeArrow(arrow_img,textview);
     }
 
+    void changeArrow(ImageView arrowView, TextView text_msg){
+        String msg = (String) text_msg.getText();
+
+        if(msg.indexOf("좌회전")>=0){
+            arrowView.setImageResource(R.drawable.back);
+        }
+        else if(msg.indexOf("우회전")>=0){
+            arrowView.setImageResource(R.drawable.next);
+        }
+        else{
+            arrowView.setImageResource(R.drawable.uparrow);
+        }
+    }
+
+    //surface 및 카메라 권한 체크 함수들
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         try {
