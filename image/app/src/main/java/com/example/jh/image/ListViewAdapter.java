@@ -74,12 +74,6 @@ public class ListViewAdapter extends BaseAdapter {
         item.setTitle(title);
         item.setDesc(desc);
 
-//        int index = listViewItemList.size();
-//        if(index == 0)
-//            ;
-//        else if(index > 0)
-//            index--;
-//        listViewItemList.add(index, item);  // 항상 마지막에 추가한다.(가장 늦게 검색한게 맨위에 올라가 잇도록)
         listViewItemList.add(0, item);  // 항상 마지막에 추가한다.(가장 늦게 검색한게 맨위에 올라가 잇도록)
     }
 }

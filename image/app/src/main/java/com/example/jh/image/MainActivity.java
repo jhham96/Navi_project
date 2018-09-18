@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
                 Handler handler = new Handler() {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                //startActivity(intent);
                 startActivity(new Intent(MainActivity.this, Main2Activity.class));
                 finish();
             }

@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
+
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,7 +26,7 @@ import java.util.List;
 public class Main2Activity extends AppCompatActivity {
 
     private ListView listView;
-//    private ListViewAdapter adapter;
+    private ListViewAdapter adapter;
     private ImageButton searchButton;
     private EditText start, finish;
 
@@ -32,7 +34,7 @@ public class Main2Activity extends AppCompatActivity {
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
@@ -41,17 +43,48 @@ public class Main2Activity extends AppCompatActivity {
         start = (EditText) findViewById(R.id.startLocation);
         finish = (EditText) findViewById(R.id.finishLocation);
 
-        initHistory();  // 히스토리 초기화
+        adapter = new ListViewAdapter();
+        listView.setAdapter(adapter);
+
+        initHistory();  // 히스토리 초기화(DB와 동기화)
 
         // 검색버튼을 누르는 순간
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (start.getText().toString().equals("") || finish.getText().toString().equals(""))
 
+                // 빈칸 예외처리(출발지, 도착지 모두 필요 (구현완료)
+                if (start.getText().toString().equals("") || finish.getText().toString().equals("")) {
+                    Toast.makeText(Main2Activity.this, "출발지, 도착지를 지정해주세요", Toast.LENGTH_SHORT).show();
                     return;
+                }
 
-                // 중복되는게 있는지 체크 해주는 것도 추가할 예정
+                // 중복체크 (구현완료)
+                /* 1. listview에서 데이터를 가져옴.
+                 *  2. 하나씩 비교
+                 *  3. 있으면 push 전에 return(종료), 없으면 for문 다 돌고 일반순서대로 진행 */
+                for(int i = 0; i < adapter.getCount(); i++) {
+                    ListViewItem listViewItem = (ListViewItem) adapter.getItem(i);
+                    String s = listViewItem.getTitle();
+                    String f = listViewItem.getDesc();
+
+                    if(s.equals((start.getText().toString())) && f.equals(finish.getText().toString())) {
+                        Toast.makeText(Main2Activity.this, "중복되는 내용이 있어, 바로 연결합니다.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+
+                // 20개초과시 옛데이터 삭제후 최신데이터 삽입(*******구현필요)
+                /* 1. 20개 넘어가는지 확인
+                 *  2. 넘어갈시 인덱스 20번째 해당하는 데이터 삭제
+                 *  3. 새로운 데이터 추가
+                 *   * 이로써 데이터는 20개가 계속 유지되게 된다.(인덱스 0 ~ 19 고정으로 유지된다.) */
+                /*if(adapter.getCount() > 20) {
+                    adapter.deleteItem(19);     // 어뎁터에서도 지우고
+                    // DB에서도 지워야 한다.
+//                    databaseReference.child("Location").removeValue()
+                }*/
+
 
                 DataSave data = new DataSave(start.getText().toString(), finish.getText().toString());
                 databaseReference.child("Location").push().setValue(data);          // DB에 내용추가
@@ -70,6 +103,8 @@ public class Main2Activity extends AppCompatActivity {
                 Drawable iconDrawable = item.getIcon() ;
 
                 // TODO : use item data.
+
+                // 기록부분 삭제 및 전체삭제 기능(고려중, 버튼을 추가로 만들어야 함)
             }
         }) ;
     }
@@ -88,21 +123,17 @@ public class Main2Activity extends AppCompatActivity {
     // * 해야 하는것 ==> DB에 data 전달 및 받아오는 과정?
 
     private void initHistory() {
-
-        final ListViewAdapter adapter = new ListViewAdapter();
-        listView.setAdapter(adapter);
-
-
         databaseReference.child("Location").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 addHistory(dataSnapshot, adapter);
+                adapter.notifyDataSetChanged();     // adapter 최신화
                 Log.e("LOG", "s:"+s);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                notify();
+
             }
 
             @Override
@@ -120,6 +151,7 @@ public class Main2Activity extends AppCompatActivity {
 
             }
         });
+
     }
 
     public void onSwitchButtonClicked(View v) {
