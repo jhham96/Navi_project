@@ -6,22 +6,25 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
 
-    private Button search_btn;
+public class PreviewActivity extends AppCompatActivity {
+
+    private Button start_btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_preview);
 
-        search_btn = (Button)findViewById(R.id.search);
-        search_btn.setOnClickListener(new View.OnClickListener() {
+        start_btn = (Button)findViewById(R.id.start);
+        start_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
+                Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
+
 }
