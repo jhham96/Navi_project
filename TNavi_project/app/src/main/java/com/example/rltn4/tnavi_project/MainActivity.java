@@ -13,6 +13,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.Manifest;
+import android.support.v4.app.ActivityCompat;
+
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
+
+    private Button search_btn;
+    final int MY_PERMISSION_REQUEST_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,5 +168,15 @@ public class MainActivity extends AppCompatActivity {
         // swap(switch)
         editText1.setText(string2);
         editText2.setText(string1);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},MY_PERMISSION_REQUEST_CODE);
+
+        search_btn = (Button)findViewById(R.id.search);
+        search_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
