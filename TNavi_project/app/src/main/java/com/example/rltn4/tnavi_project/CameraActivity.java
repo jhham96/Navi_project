@@ -212,7 +212,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             pitch_text.setText(String.format("%f",handling_x));
                             if(handling_x>=20 && handling_x<=40) {
                                 building_text.setText("건물있당!");
-                                building_text.setX((float)(width*(handling_x-20)/20));
+                                building_text.setX((float)(width-width*(handling_x-20)/20));
                             }
                             else{
                                 building_text.setText("");
