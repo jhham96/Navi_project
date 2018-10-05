@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "623615634768",
-    "firebase_url": "https://naviproject-e94b2.firebaseio.com",
-    "project_id": "naviproject-e94b2",
-    "storage_bucket": "naviproject-e94b2.appspot.com"
+    "project_number": "635410803766",
+    "firebase_url": "https://fortest-b2281.firebaseio.com",
+    "project_id": "fortest-b2281",
+    "storage_bucket": "fortest-b2281.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:623615634768:android:7dbcbc164bebd034",
+        "mobilesdk_app_id": "1:635410803766:android:59714e55a4e5df32",
         "android_client_info": {
-          "package_name": "com.example.jh.image"
+          "package_name": "com.example.rltn4.tnavi_project"
         }
       },
       "oauth_client": [
         {
-          "client_id": "623615634768-385fo7808105beq932465furfk6tkj98.apps.googleusercontent.com",
+          "client_id": "635410803766-nf2tnti0evcch6a586dhbvcfiblu4hmb.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBAEyHJitF1qJeQzCFRcsbs_p3jJXZSAKI"
+          "current_key": "AIzaSyB0t26eab1YjTCgcLjtLraBVdec_4Zqje8"
         }
       ],
       "services": {

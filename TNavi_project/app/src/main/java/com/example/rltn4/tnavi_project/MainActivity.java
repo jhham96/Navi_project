@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
-    private Button search_btn;
+    private ImageButton search_btn;
     final int MY_PERMISSION_REQUEST_CODE = 100;
 
     @Override
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         editText2.setText(string1);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},MY_PERMISSION_REQUEST_CODE);
 
-        search_btn = (Button)findViewById(R.id.search);
+        search_btn = (ImageButton)findViewById(R.id.searchButton);
         search_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
