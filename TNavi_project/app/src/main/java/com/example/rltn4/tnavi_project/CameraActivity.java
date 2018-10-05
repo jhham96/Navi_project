@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -17,6 +18,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -57,7 +60,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private double pitch; // y
 
     private TextView building_text;
-
+    TextView first_x;
+    TextView pitch_text;
     /* 단위 시간을 구하기 위한 변수 */
     private double timestamp = 0.0;
     private double dt;
@@ -70,6 +74,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private double firstMagn;
     private double handling_x;
 
+    int width;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,7 +141,13 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         // textview 메세지에 따라 화살표 변경 추후에 메세지 변경하는 함수에 넣어서 호출
         changeArrow(arrow_img,textview);
 
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        width = metrics.widthPixels;
         building_text = (TextView)findViewById(R.id.building_text);
+        first_x = (TextView)findViewById(R.id.first_x);
+        pitch_text = (TextView)findViewById(R.id.pitch);
 
         mySensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         // 자이로스코프 센서를 사용하겠다고 등록
@@ -196,9 +207,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             else {
                                 text = -(pitch * rad_to_dgr) % 360;
                             }
+                            first_x.setText(String.format("%f",firstMagn));
                             handling_x = (text+firstMagn)%360; // handling_x = 핸드폰 들고 나침반 각도
+                            pitch_text.setText(String.format("%f",handling_x));
                             if(handling_x>=20 && handling_x<=40) {
                                 building_text.setText("건물있당!");
+                                building_text.setX((float)(width*(handling_x-20)/20));
                             }
                             else{
                                 building_text.setText("");
