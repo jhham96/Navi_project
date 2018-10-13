@@ -1,10 +1,13 @@
 package com.example.rltn4.tnavi_project;
 
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapMarkerItem;
@@ -27,8 +31,15 @@ public class MapsActivity extends AppCompatActivity {
     private TMapView tMapView;
     private TMapData tMapData;
     //    private GpsInfo gps;
+    private final int PERMISSIONS_ACCESS_FINE_LOCATION = 1000;
+    private final int PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
+    private boolean isAccessFineLocation = false;
+    private boolean isAccessCoarseLocation = false;
+    private boolean isPermission = false;
     private Button change_btn;
     private ProgressBar percent_proBar;
+
+    private ArrayList<String> messageList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +73,16 @@ public class MapsActivity extends AppCompatActivity {
         });
 
 //        gps = new GpsInfo(this);
+
+        final TextView textView = (TextView) findViewById(R.id.textView);
 //
 //        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker);
 //        bitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, false); // 마커 아이콘 사이즈 조정
 //
+//        if (!isPermission) {
+//            callPermission();
+//        }
+
 //        if (gps.isGetLocation()) {
 //
 //            TMapPoint currentPoint = new TMapPoint(gps.getLatitude(), gps.getLongitude());
@@ -75,12 +92,17 @@ public class MapsActivity extends AppCompatActivity {
 //            currentMarker.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
 //            currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
 //            tMapView.addMarkerItem("currentpoint", currentMarker); // 지도에 마커 추가
+
+//            gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
+//            gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
+//            Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
 //
 //        } else {
-//            // GPS 를 사용할수 없으므로
+//            // GPS 설정을 확인한다.
 //            gps.showSettingsAlert();
 //        }
 //
+//        // 화면 중심을 GPS 로 한다.
 //        tMapView.setCenterPoint(gps.getLongitude(), gps.getLatitude());
 //
 //        Log.d("currentpoint: ", Double.toString(gps.getLatitude()) + ", " + Double.toString(gps.getLongitude()));
@@ -125,6 +147,7 @@ public class MapsActivity extends AppCompatActivity {
                     ArrayList<TMapPoint> TMapPointList = tMapPolyLine.getLinePoint();
                     ArrayList<TMapPoint> pathList = new ArrayList<>(); // 경로에서 중복을 제외한 위도, 경도를 나타내는 변수이다.
                     ArrayList<TMapPoint> pointList = new ArrayList<>(); // 출발지, 도착지, 중간 지점의 위도, 경도를 나타내는 변수이다.
+                    messageList = new ArrayList<>(); // 길안내 메시지를 나타내는 변수이다.
 
                     for (int i = 0; i < TMapPointList.size(); i++) {
                         if (!pathList.contains(TMapPointList.get(i))) {
@@ -193,24 +216,69 @@ public class MapsActivity extends AppCompatActivity {
                             pointList.add(pathList.get(i));
 
                             // 거리 메시지를 생성한다.
-                            Log.d("distance", "약 " + Integer.toString((int) Math.round(distance(pointList.get(pointList.size() - 2).getLatitude(), pointList.get(pointList.size() - 2).getLongitude(), pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude(), "meter"))) + "m 이동");
+                            String distance = new String();
+                            distance = "약 " + Integer.toString((int) Math.round(distance(pointList.get(pointList.size() - 2).getLatitude(), pointList.get(pointList.size() - 2).getLongitude(), pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude(), "meter"))) + "m 이동";
+                            messageList.add(distance);
+//                            Log.d("distance", "약 " + Integer.toString((int) Math.round(distance(pointList.get(pointList.size() - 2).getLatitude(), pointList.get(pointList.size() - 2).getLongitude(), pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude(), "meter"))) + "m 이동");
 
                             index++;
+
+                            // 시 방향 메시지를 생성한다.
+                            String direction = new String();
+
+                            if((int) angle > 120) {
+                                direction = "7시";
+                            } else if((int) angle > 60) {
+                                direction = "9시";
+                            } else if((int) angle > 30) {
+                                direction = "11시";
+                            } else if((int) angle > -60) {
+                                direction = "1시";
+                            } else if((int) angle > -120) {
+                                direction = "3시";
+                            } else if((int) angle > -180) {
+                                direction = "5시";
+                            }
 
                             // 방향 메시지를 생성한다.
                             if((int) angle > 0)
                             {
-                                Log.d("turning", "왼쪽 방향으로");
+                                direction = direction + " 방향 왼쪽으로";
+//                                Log.d("turning", direction + " 방향 왼쪽으로");
                             }
                             else
                             {
-                                Log.d("turning", "오른쪽 방향으로");
+                                direction = direction + " 방향 오른쪽으로";
+//                                Log.d("turning", direction + " 방향 오른쪽으로");
                             }
+
+                            messageList.add(direction);
                         }
                     }
 
                     // 도착지를 기록한다.
                     pointList.add(pathList.get(pathList.size() - 1));
+
+                    // 거리 메시지를 생성한다.
+                    String distance = new String();
+                    distance = "약 " + Integer.toString((int) Math.round(distance(pointList.get(pointList.size() - 2).getLatitude(), pointList.get(pointList.size() - 2).getLongitude(), pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude(), "meter"))) + "m 이동";
+                    messageList.add(distance);
+
+                    // 길안내 메시지를 출력한다.
+                    for ( int i = 0; i < messageList.size(); i++) {
+                        Log.d("message", messageList.get(i));
+                    }
+
+                    // GPS 관련 정보를 설정한다.
+//                    gps.setMessageList(messageList);
+//                    gps.setPointList(pointList);
+
+                    (MapsActivity.this).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            textView.setText(messageList.get(0));
+                        }
+                    });
 //
 //                    // 거리 메시지를 생성한다.
 //                    Log.d("distance", "약 " + Integer.toString((int) Math.round(distance(pointList.get(pointList.size() - 2).getLatitude(), pointList.get(pointList.size() - 2).getLongitude(), pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude(), "meter"))) + "m 이동");
@@ -267,5 +335,47 @@ public class MapsActivity extends AppCompatActivity {
     // This function converts radians to decimal degrees
     private static double rad2deg(double rad) {
         return (rad * 180 / Math.PI);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        if (requestCode == PERMISSIONS_ACCESS_FINE_LOCATION
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            isAccessFineLocation = true;
+
+        } else if (requestCode == PERMISSIONS_ACCESS_COARSE_LOCATION
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+            isAccessCoarseLocation = true;
+        }
+
+        if (isAccessFineLocation && isAccessCoarseLocation) {
+            isPermission = true;
+        }
+    }
+
+    // 권한 요청
+    private void callPermission() {
+        // Check the SDK version and whether the permission is already granted or not.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_ACCESS_FINE_LOCATION);
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+
+            requestPermissions(
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSIONS_ACCESS_COARSE_LOCATION);
+        } else {
+            isPermission = true;
+        }
     }
 }
