@@ -1,5 +1,6 @@
 package com.example.rltn4.tnavi_project;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
@@ -33,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
-    private ImageButton search_btn;
-    final int MY_PERMISSION_REQUEST_CODE = 100;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new ListViewAdapter();
         listView.setAdapter(adapter);
+
+        final Activity activity = this;
 
         initHistory();  // 히스토리 초기화(DB와 동기화)
 
@@ -77,20 +77,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // 20개초과시 옛데이터 삭제후 최신데이터 삽입(*******구현필요)
+                // 20개 초과시 가장 오래된 데이터 삭제후 최신데이터 삽입함으로써 20개 유지(*******구현필요)
                 /* 1. 20개 넘어가는지 확인
                  *  2. 넘어갈시 인덱스 20번째 해당하는 데이터 삭제
                  *  3. 새로운 데이터 추가
                  *   * 이로써 데이터는 20개가 계속 유지되게 된다.(인덱스 0 ~ 19 고정으로 유지된다.) */
-                /*if(adapter.getCount() > 20) {
-                    adapter.deleteItem(19);     // 어뎁터에서도 지우고
-                    // DB에서도 지워야 한다.
-//                    databaseReference.child("Location").removeValue()
-                }*/
+                if(adapter.getCount() > 19) {
+                    adapter.deleteItem(19);    // 옛날 데이터 삭제
+                }
+                // 최신 데이터 삽입
+                adapter.addItem(ContextCompat.getDrawable(activity, R.drawable.walking), start.getText().toString(), finish.getText().toString());
+                adapter.notifyDataSetChanged();
 
-
-                DataSave data = new DataSave(start.getText().toString(), finish.getText().toString());
-                databaseReference.child("Location").push().setValue(data);          // DB에 내용추가
+                Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -168,15 +168,21 @@ public class MainActivity extends AppCompatActivity {
         // swap(switch)
         editText1.setText(string2);
         editText2.setText(string1);
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},MY_PERMISSION_REQUEST_CODE);
+    }
 
-        search_btn = (ImageButton)findViewById(R.id.searchButton);
-        search_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
-                startActivity(intent);
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // firebase에 등록
+        //      1. firebase 초기화
+        //      2. 리스트뷰 내용 삽입
+        //      3. 종료
+        databaseReference.child("Location").setValue(null);
+        for(int i = adapter.getCount() - 1 ; i >= 0  ; i--) {
+            DataSave data = new DataSave(adapter.getItem(i).getTitle(), adapter.getItem(i).getDesc());
+            databaseReference.child("Location").push().setValue(data);          // DB에 내용추가
+        }
+
     }
 }

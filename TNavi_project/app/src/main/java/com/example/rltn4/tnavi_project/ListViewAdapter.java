@@ -62,7 +62,7 @@ public class ListViewAdapter extends BaseAdapter {
 
     // 지정한 위치(position)에 있는 데이터 리턴 : 필수 구현
     @Override
-    public Object getItem(int position) {
+    public ListViewItem getItem(int position) {
         return listViewItemList.get(position) ;
     }
 
@@ -75,5 +75,9 @@ public class ListViewAdapter extends BaseAdapter {
         item.setDesc(desc);
 
         listViewItemList.add(0, item);  // 항상 마지막에 추가한다.(가장 늦게 검색한게 맨위에 올라가 잇도록)
+    }
+
+    public void deleteItem(int index) {
+        listViewItemList.remove(index);
     }
 }
