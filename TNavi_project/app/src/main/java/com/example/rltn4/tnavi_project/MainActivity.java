@@ -9,15 +9,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
-import android.Manifest;
-import android.support.v4.app.ActivityCompat;
-
-
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private ListViewAdapter adapter;
     private ImageButton searchButton;
-    private EditText start, finish;
+    private TextView start, finish;
 
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
@@ -41,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.ListView);
         searchButton = (ImageButton) findViewById(R.id.searchButton);
-        start = (EditText) findViewById(R.id.startLocation);
-        finish = (EditText) findViewById(R.id.finishLocation);
+        start = (TextView) findViewById(R.id.startLocation);
+        finish = (TextView) findViewById(R.id.finishLocation);
 
         adapter = new ListViewAdapter();
         listView.setAdapter(adapter);
@@ -109,7 +104,27 @@ public class MainActivity extends AppCompatActivity {
 
                 // 기록부분 삭제 및 전체삭제 기능(고려중, 버튼을 추가로 만들어야 함)
             }
-        }) ;
+        });
+
+        // TextView창을 클릭하면 다음 입력엑티비티로 넘어간다.
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 엑티비티 생성 및 이동
+                Intent intent = new Intent(getApplicationContext(), SetLocationActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        finish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 엑티비티 생성 및 이동
+                Intent intent = new Intent(getApplicationContext(), SetLocationActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void addHistory(DataSnapshot dataSnapshot, ListViewAdapter adapter) {
@@ -157,17 +172,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void onSwitchButtonClicked(View v) {
-        // Get editText Objects
-        EditText editText1 = (EditText)findViewById(R.id.startLocation);
-        EditText editText2 = (EditText)findViewById(R.id.finishLocation);
+        // Get TextView Objects
+        TextView TextView1 = (TextView)findViewById(R.id.startLocation);
+        TextView TextView2 = (TextView)findViewById(R.id.finishLocation);
 
-        // Get editText
-        String string1 = editText1.getText().toString();
-        String string2 = editText2.getText().toString();
+        // Get TextView
+        String string1 = TextView1.getText().toString();
+        String string2 = TextView2.getText().toString();
 
         // swap(switch)
-        editText1.setText(string2);
-        editText2.setText(string1);
+        TextView1.setText(string2);
+        TextView2.setText(string1);
     }
 
     @Override
