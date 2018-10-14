@@ -18,17 +18,27 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.skt.Tmap.TMapPOIItem;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    // 검색결과 저장할 변수 선언
+    ArrayList<TMapPOIItem> tMapPOIItemsStart;
+    ArrayList<TMapPOIItem> tMapPOIItemsFinish;
+
+    // 엑티비티에서 사용할 리스트뷰 및 검색창과 관련된 변수 선언
     private ListView listView;
     private ListViewAdapter adapter;
     private ImageButton searchButton;
     private TextView start, finish;
 
+    // 최근 히스토리를 저장할 DB와 관련된 변수 선언
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
+    // 시작
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,14 +49,18 @@ public class MainActivity extends AppCompatActivity {
         start = (TextView) findViewById(R.id.startLocation);
         finish = (TextView) findViewById(R.id.finishLocation);
 
+        // 어뎁터를 생성해 리스트뷰와 연결한다.
         adapter = new ListViewAdapter();
         listView.setAdapter(adapter);
 
+        // 검색버튼을 누르면 다음 엑티비티로 이동하는데, 현재 엑티비티 값이 필요. 보통 this로 사용하나, 사용이 불가능해 이를 activity로 대체
+        // c97 : adapter.addItem(ContextCompat.getDrawable(activity, ~~~~);
         final Activity activity = this;
 
-        initHistory();  // 히스토리 초기화(DB와 동기화)
+        // 히스토리 초기화(DB와 동기화)
+        initHistory();
 
-        // 검색버튼을 누르는 순간
+        // 검색버튼 클릭리스너
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
