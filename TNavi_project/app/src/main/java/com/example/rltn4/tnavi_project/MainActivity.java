@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
         start = (TextView) findViewById(R.id.startLocation);
         finish = (TextView) findViewById(R.id.finishLocation);
 
+        start.setText("중앙대학교 정문");
+        finish.setText("흑석역");
         // 어뎁터를 생성해 리스트뷰와 연결한다.
         adapter = new ListViewAdapter();
         listView.setAdapter(adapter);

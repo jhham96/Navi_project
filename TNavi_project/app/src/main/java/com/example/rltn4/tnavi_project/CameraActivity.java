@@ -52,6 +52,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     private float[] mGravity = new float[3];
     private float[] mGeomagnetic = new float[3];
+    private float[] mGyroValues = new float[3];
     private float[] Rotation = new float[9];
     private float[] I = new float[9];
 
@@ -74,6 +75,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private double handling_x;
 
     int width;
+
+    private boolean gyroRunning;
+    private boolean accRunning;
+    private double mAccPitch, mAccRoll;
+    private double temp;
+    private float a = 0.2f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,6 +172,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 synchronized (this) {
                     if(isFirst<100) {
                         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                            if(!accRunning){
+                                accRunning=true;
+                            }
                             mGravity[0] = alpha * mGravity[0] + (1 - alpha) * sensorEvent.values[0];
                             mGravity[1] = alpha * mGravity[1] + (1 - alpha) * sensorEvent.values[1];
                             mGravity[2] = alpha * mGravity[2] + (1 - alpha) * sensorEvent.values[2];
@@ -187,10 +197,15 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         isFirst++;
                     }
                     if(sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+                        mGyroValues = sensorEvent.values;
+                        if(!gyroRunning){
+                            gyroRunning=true;
+                        }
                         double gyroX = sensorEvent.values[0];
                         double gyroY = sensorEvent.values[1];
                         double gyroZ = sensorEvent.values[2];
                         double text = 0.0;
+
                         /* 단위시간 계산 */
                         dt = (sensorEvent.timestamp - timestamp) * NS2S;
                         timestamp = sensorEvent.timestamp;
@@ -221,6 +236,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         }
                     }
                 }
+                if(gyroRunning&&accRunning){
+                    complementary(sensorEvent.timestamp);
+                }
             }
             @Override
             public void onAccuracyChanged(Sensor sensor, int i) {
@@ -229,6 +247,31 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         };
     }
 
+    private void complementary(double new_ts){
+        /* 자이로랑 가속 해제 */
+        gyroRunning = false;
+        accRunning = false;
+
+        /*센서 값 첫 출력시 dt(=timestamp - event.timestamp)에 오차가 생기므로 처음엔 break */
+        if(timestamp == 0){
+            timestamp = new_ts;
+            return;
+        }
+        dt = (new_ts - timestamp) * NS2S; // ns->s 변환
+        timestamp = new_ts;
+
+        /* degree measure for accelerometer */
+        mAccPitch = -Math.atan2(mGravity[0], mGravity[2]) * 180.0 / Math.PI; // Y 축 기준
+        mAccRoll= Math.atan2(mGravity[1], mGravity[2]) * 180.0 / Math.PI; // X 축 기준
+
+        /**
+         * 1st complementary filter.
+         *  mGyroValuess : 각속도 성분.
+         *  mAccPitch : 가속도계를 통해 얻어낸 회전각.
+         */
+        temp = (1/a) * (mAccPitch - pitch) + mGyroValues[1];
+        pitch = pitch + (temp*dt);
+    }
     void changeArrow(ImageView arrowView, TextView text_msg){
         String msg = (String) text_msg.getText();
 
