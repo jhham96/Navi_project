@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapMarkerItem;
@@ -30,7 +31,7 @@ public class MapsActivity extends AppCompatActivity {
 
     private TMapView tMapView;
     private TMapData tMapData;
-    //    private GpsInfo gps;
+    private GpsInfo gps;
     private final int PERMISSIONS_ACCESS_FINE_LOCATION = 1000;
     private final int PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
     private boolean isAccessFineLocation = false;
@@ -72,39 +73,39 @@ public class MapsActivity extends AppCompatActivity {
             }
         });
 
-//        gps = new GpsInfo(this);
+        gps = new GpsInfo(this);
 
         final TextView textView = (TextView) findViewById(R.id.textView);
-//
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker);
-//        bitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, false); // 마커 아이콘 사이즈 조정
-//
-//        if (!isPermission) {
-//            callPermission();
-//        }
 
-//        if (gps.isGetLocation()) {
-//
-//            TMapPoint currentPoint = new TMapPoint(gps.getLatitude(), gps.getLongitude());
-//            TMapMarkerItem currentMarker = new TMapMarkerItem();
-//
-//            currentMarker.setIcon(bitmap); // 마커 아이콘 지정
-//            currentMarker.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
-//            currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
-//            tMapView.addMarkerItem("currentpoint", currentMarker); // 지도에 마커 추가
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker);
+        bitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, false); // 마커 아이콘 사이즈 조정
 
-//            gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
-//            gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
-//            Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
-//
-//        } else {
-//            // GPS 설정을 확인한다.
-//            gps.showSettingsAlert();
-//        }
-//
-//        // 화면 중심을 GPS 로 한다.
-//        tMapView.setCenterPoint(gps.getLongitude(), gps.getLatitude());
-//
+        if (!isPermission) {
+            callPermission();
+        }
+
+        if (gps.isGetLocation()) {
+
+            TMapPoint currentPoint = new TMapPoint(gps.getLatitude(), gps.getLongitude());
+            TMapMarkerItem currentMarker = new TMapMarkerItem();
+
+            currentMarker.setIcon(bitmap); // 마커 아이콘 지정
+            currentMarker.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
+            currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
+            tMapView.addMarkerItem("currentpoint", currentMarker); // 지도에 마커 추가
+
+            gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
+            gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
+            Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
+
+        } else {
+            // GPS 설정을 확인한다.
+            gps.showSettingsAlert();
+        }
+
+        // 화면 중심을 GPS 로 한다.
+        tMapView.setCenterPoint(gps.getLongitude(), gps.getLatitude());
+
 //        Log.d("currentpoint: ", Double.toString(gps.getLatitude()) + ", " + Double.toString(gps.getLongitude()));
 
         new Thread() {
@@ -270,8 +271,8 @@ public class MapsActivity extends AppCompatActivity {
                     }
 
                     // GPS 관련 정보를 설정한다.
-//                    gps.setMessageList(messageList);
-//                    gps.setPointList(pointList);
+                    gps.setMessageList(messageList);
+                    gps.setPointList(pointList);
 
                     (MapsActivity.this).runOnUiThread(new Runnable() {
                         @Override
