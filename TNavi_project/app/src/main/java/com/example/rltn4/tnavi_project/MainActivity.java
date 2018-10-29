@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     adapter.deleteItem(19);    // 옛날 데이터 삭제
                 }
                 // 최신 데이터 삽입
-                adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.walking), listViewItem);
+                adapter.addItem(listViewItem);
                 adapter.notifyDataSetChanged();
 
                 Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         // 키값 하나하나 다시 gson(객체)형태로 변환해 객체형 ArrayList에 추가
         for(int i = 0; i < preference_keys.size(); i++) {
             ListViewItem listViewItem = gson.fromJson(preference_keys.get(i), ListViewItem.class);
-            adapter.addItem(ContextCompat.getDrawable(this, R.drawable.walking), listViewItem);
+            adapter.addItem(listViewItem);
         }
         adapter.notifyDataSetChanged();     // adapter 최신화
 
@@ -202,13 +202,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
 
-        // firebase에 등록
-        //      1. firebase 초기화
-        //      2. 리스트뷰 내용 삽입
-        //      3. 종료
         SharedPreferences sp = getSharedPreferences("main_activity_his", MODE_PRIVATE); // main_activity_his라는 preference를 참조
         SharedPreferences.Editor editor = sp.edit();
         editor.clear();         // DB data 초기화
@@ -221,6 +217,16 @@ public class MainActivity extends AppCompatActivity {
             editor.putString(i.toString(), gson.toJson(data, ListViewItem.class));  // 객체->Json으로 변환한 값 추가
         }
         editor.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // firebase에 등록
+        //      1. firebase 초기화
+        //      2. 리스트뷰 내용 삽입
+        //      3. 종료
 
     }
 

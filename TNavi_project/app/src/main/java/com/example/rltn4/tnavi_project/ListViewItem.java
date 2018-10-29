@@ -6,21 +6,15 @@ import com.skt.Tmap.TMapPOIItem;
 import java.io.Serializable;
 
 public class ListViewItem implements Serializable {
-    private Drawable iconDrawable ;
     private TMapBox tMapBoxStart;
     private TMapBox tMapBoxFinish;
 
     public ListViewItem(ListViewItem item) {
-        this.iconDrawable = item.getIconDrawable();
         this.tMapBoxStart= item.gettMapBoxStart();
         this.tMapBoxFinish = item.gettMapBoxFinish();
     }
     public ListViewItem() {
 
-    }
-
-    public Drawable getIconDrawable() {
-        return iconDrawable;
     }
 
     public TMapBox gettMapBoxStart() {
@@ -29,10 +23,6 @@ public class ListViewItem implements Serializable {
 
     public TMapBox gettMapBoxFinish() {
         return tMapBoxFinish;
-    }
-
-    public void setIconDrawable(Drawable iconDrawable) {
-        this.iconDrawable = iconDrawable;
     }
 
     public void settMapBoxStart(TMapBox tMapBox) {

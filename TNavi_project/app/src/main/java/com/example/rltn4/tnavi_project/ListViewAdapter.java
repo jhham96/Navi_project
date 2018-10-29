@@ -2,6 +2,7 @@ package com.example.rltn4.tnavi_project;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,7 @@ public class ListViewAdapter extends BaseAdapter {
         ListViewItem listViewItem = listViewItemList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
-        iconImageView.setImageDrawable(listViewItem.getIconDrawable());
+        iconImageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.walking));
         titleTextView.setText(listViewItem.gettMapBoxStart().getName());
         descTextView.setText(listViewItem.gettMapBoxFinish().getName());
 
@@ -66,7 +67,7 @@ public class ListViewAdapter extends BaseAdapter {
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
-    public void addItem(Drawable icon, ListViewItem listViewItem) {
+    public void addItem(ListViewItem listViewItem) {
         listViewItemList.add(0, listViewItem);  // 항상 마지막에 추가한다.(가장 늦게 검색한게 맨위에 올라가 잇도록)
     }
 
