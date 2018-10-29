@@ -29,7 +29,6 @@ public class ListViewAdapter extends BaseAdapter {
     // position에 위치한 데이터를 화면에 출력하는데 사용될 View를 리턴. : 필수 구현
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final int pos = position;
         final Context context = parent.getContext();
 
         // "listview_item" Layout을 inflate하여 convertView 참조 획득.
@@ -47,9 +46,9 @@ public class ListViewAdapter extends BaseAdapter {
         ListViewItem listViewItem = listViewItemList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
-        iconImageView.setImageDrawable(listViewItem.getIcon());
-        titleTextView.setText(listViewItem.getTitle());
-        descTextView.setText(listViewItem.getDesc());
+        iconImageView.setImageDrawable(listViewItem.getIconDrawable());
+        titleTextView.setText(listViewItem.gettMapBoxStart().getName());
+        descTextView.setText(listViewItem.gettMapBoxFinish().getName());
 
         return convertView;
     }
@@ -67,14 +66,8 @@ public class ListViewAdapter extends BaseAdapter {
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
-    public void addItem(Drawable icon, String title, String desc) {
-        ListViewItem item = new ListViewItem();
-
-        item.setIcon(icon);
-        item.setTitle(title);
-        item.setDesc(desc);
-
-        listViewItemList.add(0, item);  // 항상 마지막에 추가한다.(가장 늦게 검색한게 맨위에 올라가 잇도록)
+    public void addItem(Drawable icon, ListViewItem listViewItem) {
+        listViewItemList.add(0, listViewItem);  // 항상 마지막에 추가한다.(가장 늦게 검색한게 맨위에 올라가 잇도록)
     }
 
     public void deleteItem(int index) {
