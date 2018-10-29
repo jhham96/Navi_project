@@ -100,7 +100,7 @@ public class MapsActivity extends AppCompatActivity {
             currentMarker.setIcon(bitmap); // 마커 아이콘 지정
             currentMarker.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
             currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
-            tMapView.addMarkerItem("currentpoint", currentMarker); // 지도에 마커 추가
+            tMapView.addMarkerItem("currentPoint", currentMarker); // 지도에 마커 추가
 
             gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
             gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
