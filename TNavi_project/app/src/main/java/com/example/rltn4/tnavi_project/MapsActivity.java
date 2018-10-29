@@ -30,7 +30,7 @@ public class MapsActivity extends AppCompatActivity {
 
     private TMapView tMapView;
     private TMapData tMapData;
-    //    private GpsInfo gps;
+    private GpsInfo gps; // 주석처리 되어있었당 ㅎㅅㅎ...
     private final int PERMISSIONS_ACCESS_FINE_LOCATION = 1000;
     private final int PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
     private boolean isAccessFineLocation = false;
@@ -62,11 +62,16 @@ public class MapsActivity extends AppCompatActivity {
         percent_proBar.setMax(100);
         percent_proBar.setProgress(80);
 
+        /*test*/
+        if(getIntent().getSerializableExtra("gpsinfo")==null) {
+            gps = new GpsInfo(getApplicationContext());
+        }
         change_btn = (Button)findViewById(R.id.button1);
         change_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
+                intent.putExtra("gpsinfo",gps);
                 startActivity(intent);
                 finish();
             }
