@@ -60,8 +60,7 @@ public class MapsActivity extends AppCompatActivity {
 
         percent_proBar = (ProgressBar)findViewById(R.id.percent);
         percent_proBar.setIndeterminate(false);
-        percent_proBar.setMax(100);
-        percent_proBar.setProgress(80);
+
 
         // 인텐트로 전달 받은 것을 받아 선언한다.
         final ListViewItem listViewItem = (ListViewItem) getIntent().getSerializableExtra("Location");
@@ -104,6 +103,7 @@ public class MapsActivity extends AppCompatActivity {
 
             gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
             gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
+            gps.setProgressbar(percent_proBar);
             Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
 
         } else {

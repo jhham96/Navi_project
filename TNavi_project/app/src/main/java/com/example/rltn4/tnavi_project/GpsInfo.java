@@ -18,6 +18,7 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
 
     private final Context mContext;
     private TMapView tMapView;
+    private ProgressBar proBar;
     private Bitmap bitmap;
     private TextView textView;
     private boolean flag; // 거리가 점점 가까워지거나 멀어질 경우에 대해 true, false 를 갖는 변수이다.
@@ -41,6 +43,7 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
     private ArrayList<TMapPoint> pointList;
     private ArrayList<String> messageList;
 
+    private int checkpoint_num; // 총 체크포인트 개수
     // 현재 GPS 사용 유무
     boolean isGPSEnabled = false;
 
@@ -232,12 +235,28 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
             if (distance(location.getLatitude(), location.getLongitude(), pointList.get(pIndex).getLatitude(), pointList.get(pIndex).getLongitude(), "meter") < 5 && flag) {
                 mIndex++;
                 flag = false;
+                proBar.setProgress(mIndex);
 
                 if (mIndex < messageList.size() && pIndex < pointList.size()) {
 //                    mIndex++;
                     textView.setText(messageList.get(mIndex));
                 } else {
                     textView.setText("도착하였습니다.");
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("도착하였습니다.");
+                    builder.setMessage("화면 종료하시겠습니까?");
+                    builder.setPositiveButton("예",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ((Activity)mContext).finish();
+                                }
+                            });
+                    builder.setNegativeButton("아니오",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+                    builder.show();
                 }
             }
 
@@ -313,11 +332,15 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
 
     public void setMessageList(ArrayList<String> a) {
         messageList = a;
+        checkpoint_num = messageList.size();
+        proBar.setMax(checkpoint_num);
     }
 
     public void setPointList(ArrayList<TMapPoint> a) {
         pointList = a;
     }
+
+    public void setProgressbar(ProgressBar percent_proBar){ proBar = percent_proBar;}
 
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
 
