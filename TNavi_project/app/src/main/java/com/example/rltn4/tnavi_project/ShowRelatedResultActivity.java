@@ -142,7 +142,7 @@ public class ShowRelatedResultActivity extends AppCompatActivity {
 }
 
 class TMapBox implements Serializable {
-    private String name;
+    private String name = null;
     private double lat;
     private double lon;
 
