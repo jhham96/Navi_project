@@ -6,9 +6,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import java.util.ArrayList;
@@ -22,22 +25,23 @@ public class SetLocationActivity extends AppCompatActivity {
     private ArrayAdapter adapter;
     private ArrayList<String> listitems = new ArrayList<>();
     private String is_start_or_finish;
+    private ImageButton imageButton;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i("intent22222222",String.format("%s",((TMapBox)data.getSerializableExtra("data")).getName()));
-        if(data.getStringExtra("value").equals("1")) { //start
-            if(resultCode == 100){
+//        Log.i("intent22222222",String.format("%s",((TMapBox)data.getSerializableExtra("data")).getName()));
+        if(resultCode == 100) {
+            if(data.getStringExtra("value").equals("1")) { //start
                 setResult(100,data);
                 finish();
             }
-        }
-        else if(data.getStringExtra("value").equals("2")){ //finish
-            if(resultCode == 100){
+            else if(data.getStringExtra("value").equals("2")){ //finish
                 setResult(200,data);
                 finish();
             }
+        } else if(resultCode == 300) {
+            ;
         }
     }
 
@@ -82,7 +86,47 @@ public class SetLocationActivity extends AppCompatActivity {
         initHistory();  // history 초기화
 
 
+        // back button 초기화
+        imageButton = (ImageButton) findViewById(R.id.backButton);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                setResult(400,intent);  // 이전으로 이동
+                finish();
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                // 클릭한 item을 get
+                String str = (String) parent.getItemAtPosition(position) ;
+
+                // 검색창에 선택한 데이터 내용 삽입
+                editText.setText(str);
+                Intent intent = new Intent(getApplicationContext(), ShowRelatedResultActivity.class);
+                intent.putExtra("location", editText.getText().toString());         // 다음 엑티비티로 넘어가기전, 결과값을 넘겨주기 위해 intent에 edit창의 내용을 저장한다.
+                intent.putExtra("value", is_start_or_finish);                         // MainActivity에서 받은 Intent정보를 받아 계속 전달한다.(메인 엑티비티로 되돌아갈시, 이게 출발데이터인지, 도착데이터인지 구분하기 위해)
+
+                startActivityForResult(intent,3);
+
+                // 기록부분 삭제 및 전체삭제 기능(고려중, 버튼을 추가로 만들어야 함)
+            }
+        });
+
+
     }
+
+//    @Override
+    // Back key 눌러서 뒤로 가는 경우 구현.(왜 안되는지 파악 필요)
+//    public void onBackPressed() {
+//        super.onBackPressed();
+//        Intent intent = new Intent();
+//        setResult(400,intent);  // 이전으로 이동
+//        finish();
+//
+//    }
 
     private void initHistory() {
 

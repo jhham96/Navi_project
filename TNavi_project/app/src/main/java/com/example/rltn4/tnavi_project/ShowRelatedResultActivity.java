@@ -62,6 +62,8 @@ public class ShowRelatedResultActivity extends AppCompatActivity {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent();
+                setResult(300,intent);  // 이전으로 이동
                 finish();
             }
         });
@@ -148,6 +150,11 @@ class TMapBox implements Serializable {
 
     public TMapBox () {
 
+    }
+    public TMapBox (TMapBox t) {
+        this.name = t.getName();
+        this.lat = t.getLat();
+        this.lon = t.getLon();
     }
 
     public String getName() {

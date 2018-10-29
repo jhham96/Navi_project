@@ -37,20 +37,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i("intent333333",String.format("%s",((TMapBox)data.getSerializableExtra("data")).getName()));
-        if(data.getStringExtra("value").equals("1")) {
-            listViewItem.settMapBoxStart(((TMapBox)data.getSerializableExtra("data")));
+//        Log.i("intent333333",String.format("%s",((TMapBox)data.getSerializableExtra("data")).getName()));
+        if(resultCode == 400) {
+
+        } else {
+            if(data.getStringExtra("value").equals("1")) {
+                listViewItem.settMapBoxStart(((TMapBox)data.getSerializableExtra("data")));
 //            TMapPOIItem_child tMapPOIItem_child = (TMapPOIItem_child) getIntent().getSerializableExtra("data");
 //            listViewItem.settMapPOIItemsStart(tMapPOIItem_child.gettMapPOIItem());
-            // listViewItem.settMapPOIItemsStart(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
-            start.setText(listViewItem.gettMapBoxStart().getName());
+                // listViewItem.settMapPOIItemsStart(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
+                start.setText(listViewItem.gettMapBoxStart().getName());
+            }
+            else {
+                listViewItem.settMapBoxFinish(((TMapBox)data.getSerializableExtra("data")));
+                //            listViewItem.settMapPOIItemsFinish(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
+                //            finish.setText(listViewItem.gettMapPOIItemsFinish().getPOIName());
+                finish.setText(listViewItem.gettMapBoxFinish().getName());
+            }
         }
-        else {
-            listViewItem.settMapBoxFinish(((TMapBox)data.getSerializableExtra("data")));
-        //            listViewItem.settMapPOIItemsFinish(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
-        //            finish.setText(listViewItem.gettMapPOIItemsFinish().getPOIName());
-            finish.setText(listViewItem.gettMapBoxFinish().getName());
-         }
     }
 
     // 시작
@@ -198,17 +202,20 @@ public class MainActivity extends AppCompatActivity {
         String string2 = TextView2.getText().toString();
 
         // swap(switch)
-
+        if(TextView1.getText().toString().equals("") && TextView2.getText().toString().equals("")) {
+            return;
+        } else if(TextView1.getText().toString().equals("")) {
+            TMapBox tMapBox_tmp = new TMapBox(listViewItem.gettMapBoxFinish());
+            listViewItem.settMapBoxFinish(listViewItem.gettMapBoxStart());
+            listViewItem.settMapBoxStart(tMapBox_tmp);
+        } else /*if(TextView2.getText().toString().equals(""))*/ {
+            TMapBox tMapBox_tmp = new TMapBox(listViewItem.gettMapBoxStart());
+            listViewItem.settMapBoxStart(listViewItem.gettMapBoxFinish());
+            listViewItem.settMapBoxFinish(tMapBox_tmp);
+        }
         TextView1.setText(string2);
         TextView2.setText(string1);
 
-        if(TextView1.getText().toString().equals("") && TextView2.getText().toString().equals("")) {
-            return;
-        }
-        TMapBox tMapBox_tmp = new TMapBox();
-        tMapBox_tmp.setName(listViewItem.gettMapBoxStart().getName());
-        listViewItem.settMapBoxStart(listViewItem.gettMapBoxFinish());
-        listViewItem.settMapBoxFinish(tMapBox_tmp);
     }
 
     @Override
