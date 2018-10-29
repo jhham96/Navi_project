@@ -54,13 +54,14 @@
         android:background="@color/colorSky">
 
         <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
             android:id="@+id/percent"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:indeterminateOnly="false"
             android:max="100"
-            android:layout_weight="1"/>
+            android:progressDrawable="@drawable/progressbar" />
 
         <Button
             android:id="@+id/mode_switch"
