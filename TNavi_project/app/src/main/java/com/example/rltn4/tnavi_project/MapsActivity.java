@@ -62,6 +62,9 @@ public class MapsActivity extends AppCompatActivity {
         percent_proBar.setIndeterminate(false);
 
 
+        // 인텐트로 전달 받은 것을 받아 선언한다.
+        final ListViewItem listViewItem = (ListViewItem) getIntent().getSerializableExtra("Location");
+
         /*test*/
         if(getIntent().getSerializableExtra("gpsinfo")==null) {
             gps = new GpsInfo(getApplicationContext());
@@ -116,11 +119,11 @@ public class MapsActivity extends AppCompatActivity {
         new Thread() {
             public void run() {
                 try {
-                    ArrayList<TMapPOIItem> tMapPOIItemStartList = tMapData.findAllPOI("중앙대학교 병원"); // 출발지 검색을 위한 변수이다.
-                    ArrayList<TMapPOIItem> tMapPOIItemEndList = tMapData.findAllPOI("흑석역"); // 도착지 검색을 위한 변수이다.
-
-                    TMapPOIItem start = (TMapPOIItem) tMapPOIItemStartList.get(0); // 출발지를 나타내는 변수이다.
-                    TMapPOIItem end = (TMapPOIItem) tMapPOIItemEndList.get(0); // 도착지를 나타내는 변수이다.
+//                    ArrayList<TMapPOIItem> tMapPOIItemStartList = tMapData.findAllPOI("중앙대학교 병원"); // 출발지 검색을 위한 변수이다.
+//                    ArrayList<TMapPOIItem> tMapPOIItemEndList = tMapData.findAllPOI("흑석역"); // 도착지 검색을 위한 변수이다.
+//
+//                    TMapPOIItem start = (TMapPOIItem) tMapPOIItemStartList.get(0); // 출발지를 나타내는 변수이다.
+//                    TMapPOIItem end = (TMapPOIItem) tMapPOIItemEndList.get(0); // 도착지를 나타내는 변수이다.
 
                     // API에서 제공하는 함수이나, 부정확한 정보를 출력한다.
 //                    tMapData.findPathDataAllType(TMapData.TMapPathType.PEDESTRIAN_PATH, start.getPOIPoint(), end.getPOIPoint(), new TMapData.FindPathDataAllListenerCallback() {
@@ -139,11 +142,16 @@ public class MapsActivity extends AppCompatActivity {
 //                        }
 //                    });
 
+                    TMapPoint start = new TMapPoint(listViewItem.gettMapBoxStart().getLat(), listViewItem.gettMapBoxStart().getLon());
+                    TMapPoint end = new TMapPoint(listViewItem.gettMapBoxFinish().getLat(), listViewItem.gettMapBoxFinish().getLon());
+
                     // 지도 위에 선을 나타내는 구현이다.
-                    TMapPolyLine tMapPolyLine = tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH, start.getPOIPoint(), end.getPOIPoint());
+//                    TMapPolyLine tMapPolyLine = tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH, start.getPOIPoint(), end.getPOIPoint());
+                    TMapPolyLine tMapPolyLine = tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH, start, end);
                     tMapPolyLine.setLineColor(Color.BLUE);
                     tMapPolyLine.setLineWidth(2);
-                    tMapView.setCenterPoint(start.getPOIPoint().getLongitude(), start.getPOIPoint().getLatitude());
+//                    tMapView.setCenterPoint(start.getPOIPoint().getLongitude(), start.getPOIPoint().getLatitude());
+                    tMapView.setCenterPoint(start.getLongitude(), start.getLatitude());
                     tMapView.addTMapPolyLine("Line1", tMapPolyLine);
 
 //                    ArrayList<TMapMarkerItem> pathMarkerList = new ArrayList<>(); // 모든 경로를 마커로 표시하고자 사용하는 변수이다.

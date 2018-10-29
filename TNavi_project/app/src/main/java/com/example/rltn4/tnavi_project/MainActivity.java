@@ -24,8 +24,6 @@ public class MainActivity extends AppCompatActivity {
 
     // 검색결과 저장할 변수 선언
     private ListViewItem listViewItem;
-    private static String start_str;
-    private static String finish_str;
 
     // 엑티비티에서 사용할 리스트뷰 및 검색창과 관련된 변수 선언
     private ListView listView;
@@ -46,14 +44,12 @@ public class MainActivity extends AppCompatActivity {
 //            listViewItem.settMapPOIItemsStart(tMapPOIItem_child.gettMapPOIItem());
             // listViewItem.settMapPOIItemsStart(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
             start.setText(listViewItem.gettMapBoxStart().getName());
-            start_str = start.getText().toString();
         }
         else {
             listViewItem.settMapBoxFinish(((TMapBox)data.getSerializableExtra("data")));
         //            listViewItem.settMapPOIItemsFinish(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
         //            finish.setText(listViewItem.gettMapPOIItemsFinish().getPOIName());
             finish.setText(listViewItem.gettMapBoxFinish().getName());
-            finish_str = finish.getText().toString();
          }
     }
 
@@ -105,10 +101,10 @@ public class MainActivity extends AppCompatActivity {
                     String s = listViewItem.gettMapBoxStart().getName();
                     String f = listViewItem.gettMapBoxFinish().getName();
 
-                    if(s.equals((start.getText().toString())) && f.equals(finish.getText().toString())) {
-                        Toast.makeText(getApplicationContext(), "중복되는 내용이 있어, 바로 연결합니다.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(s.equals((start.getText().toString())) && f.equals(finish.getText().toString())) {
+//                        Toast.makeText(getApplicationContext(), "중복되는 내용이 있어, 바로 연결합니다.", Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                 }
 
                 // 20개 초과시 가장 오래된 데이터 삭제후 최신데이터 삽입함으로써 20개 유지(*******구현필요)
@@ -179,8 +175,12 @@ public class MainActivity extends AppCompatActivity {
             preference_keys.add((String)it.next());
         }
 
+        gson = new GsonBuilder().create();
+
         // 키값 하나하나 다시 gson(객체)형태로 변환해 객체형 ArrayList에 추가
         for(int i = 0; i < preference_keys.size(); i++) {
+            Log.i("get ID", preference_keys.get(i));
+            gson.fromJson(preference_keys.get(i), ListViewItem.class);
             ListViewItem listViewItem = gson.fromJson(preference_keys.get(i), ListViewItem.class);
             adapter.addItem(listViewItem);
         }
@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void onSwitchButtonClicked(View v) {
+
         // Get TextView Objects
         TextView TextView1 = (TextView)findViewById(R.id.startLocation);
         TextView TextView2 = (TextView)findViewById(R.id.finishLocation);
@@ -197,8 +198,17 @@ public class MainActivity extends AppCompatActivity {
         String string2 = TextView2.getText().toString();
 
         // swap(switch)
+
         TextView1.setText(string2);
         TextView2.setText(string1);
+
+        if(TextView1.getText().toString().equals("") && TextView2.getText().toString().equals("")) {
+            return;
+        }
+        TMapBox tMapBox_tmp = new TMapBox();
+        tMapBox_tmp.setName(listViewItem.gettMapBoxStart().getName());
+        listViewItem.settMapBoxStart(listViewItem.gettMapBoxFinish());
+        listViewItem.settMapBoxFinish(tMapBox_tmp);
     }
 
     @Override
@@ -210,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
         editor.clear();         // DB data 초기화
 
         // DB에 새로운 값추가
-        gson = new GsonBuilder().create();
+//        gson = new GsonBuilder().create();
 
         for(Integer i = adapter.getCount() - 1 ; i >= 0  ; i--) {
             ListViewItem data = new ListViewItem(adapter.getItem(i));
@@ -219,16 +229,6 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        // firebase에 등록
-        //      1. firebase 초기화
-        //      2. 리스트뷰 내용 삽입
-        //      3. 종료
-
-    }
 
     @Override
     protected void onResume() {
@@ -248,25 +248,12 @@ public class MainActivity extends AppCompatActivity {
 //            listViewItem.settMapPOIItemsStart(tMapPOIItem_child.gettMapPOIItem());
             // listViewItem.settMapPOIItemsStart(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
             start.setText(listViewItem.gettMapBoxStart().getName());
-            start_str = start.getText().toString();
         } else if(is_start_or_finish.equals("2")) {
             TMapBox tMapBox = (TMapBox) getIntent().getSerializableExtra("data");
             listViewItem.settMapBoxFinish(tMapBox);
 //            listViewItem.settMapPOIItemsFinish(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
 //            finish.setText(listViewItem.gettMapPOIItemsFinish().getPOIName());
             finish.setText(listViewItem.gettMapBoxFinish().getName());
-            finish_str = finish.getText().toString();
         }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        String start = this.start.getText().toString();
-        String finish = this.finish.getText().toString();
-
-        outState.putString("key1", start);
-        outState.putString("key2", finish);
     }
 }
