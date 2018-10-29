@@ -241,8 +241,12 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
                 if (mIndex < messageList.size() && pIndex < pointList.size()) {
 //                    mIndex++;
                     textView.setText(messageList.get(mIndex));
+                    TTS tts = new TTS(mContext, messageList.get(mIndex));
                 } else {
                     textView.setText("도착하였습니다.");
+                    TTS tts = new TTS(mContext, "도착하였습니다");
+
+                    // 도착 시, Dialog 나타나게 설정한다.
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     builder.setTitle("도착하였습니다.");
                     builder.setMessage("화면 종료하시겠습니까?");

@@ -291,6 +291,7 @@ public class MapsActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             textView.setText(messageList.get(0));
+                            TTS tts = new TTS(MapsActivity.this, messageList.get(0));
                         }
                     });
 //
