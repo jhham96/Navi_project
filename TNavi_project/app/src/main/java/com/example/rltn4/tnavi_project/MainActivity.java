@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.walking), listViewItem);
                 adapter.notifyDataSetChanged();
 
-                Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
+                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
                 intent.putExtra("Location", (Serializable) listViewItem);
                 startActivity(intent);
             }

@@ -59,7 +59,7 @@ public class SetLocationActivity extends AppCompatActivity {
                     adapter.insert(editText.getText(), 0);
 
                     if(adapter.getCount() > 19) {
-                        adapter.remove(adapter.getItem(adapter.getCount() - 1));    // 20개가 넘어가면 맨 마지막에 있는 것들을 삭제하도록 한다.
+                        adapter.remove(adapter.getItem(19));    // 20개가 넘어가면 맨 마지막에 있는 것들을 삭제하도록 한다.
                     }
 
                     // 다음 ShowRelatedResultActivity로 넘어간다.

@@ -3,7 +3,9 @@ package com.example.rltn4.tnavi_project;
 import android.graphics.drawable.Drawable;
 import com.skt.Tmap.TMapPOIItem;
 
-public class ListViewItem {
+import java.io.Serializable;
+
+public class ListViewItem implements Serializable {
     private Drawable iconDrawable ;
     private TMapBox tMapBoxStart;
     private TMapBox tMapBoxFinish;
