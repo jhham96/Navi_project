@@ -1,28 +1,45 @@
 package com.example.rltn4.tnavi_project;
+
 import android.graphics.drawable.Drawable;
+import com.skt.Tmap.TMapPOIItem;
 
 public class ListViewItem {
     private Drawable iconDrawable ;
-    private String titleStr ;
-    private String descStr ;
+    private TMapBox tMapBoxStart;
+    private TMapBox tMapBoxFinish;
 
-    public void setIcon(Drawable icon) {
-        iconDrawable = icon ;
+    public ListViewItem(ListViewItem item) {
+        this.iconDrawable = item.getIconDrawable();
+        this.tMapBoxStart= item.gettMapBoxStart();
+        this.tMapBoxFinish = item.gettMapBoxFinish();
     }
-    public void setTitle(String title) {
-        titleStr = title ;
-    }
-    public void setDesc(String desc) {
-        descStr = desc ;
+    public ListViewItem() {
+
     }
 
-    public Drawable getIcon() {
-        return this.iconDrawable ;
+    public Drawable getIconDrawable() {
+        return iconDrawable;
     }
-    public String getTitle() {
-        return this.titleStr ;
+
+    public TMapBox gettMapBoxStart() {
+        return tMapBoxStart;
     }
-    public String getDesc() {
-        return this.descStr ;
+
+    public TMapBox gettMapBoxFinish() {
+        return tMapBoxFinish;
     }
+
+    public void setIconDrawable(Drawable iconDrawable) {
+        this.iconDrawable = iconDrawable;
+    }
+
+    public void settMapBoxStart(TMapBox tMapBox) {
+        this.tMapBoxStart = tMapBox;
+    }
+
+    public void settMapBoxFinish(TMapBox tMapBox) {
+        this.tMapBoxFinish = tMapBox;
+    }
+
+
 }
