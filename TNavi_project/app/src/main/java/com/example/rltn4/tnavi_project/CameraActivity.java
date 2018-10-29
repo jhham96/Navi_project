@@ -82,12 +82,13 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private double temp;
     private float a = 0.2f;
 
+    private GpsInfo gps;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
-
+        gps = (GpsInfo)getIntent().getSerializableExtra("gpsinfo");
         if (APIVersion >= android.os.Build.VERSION_CODES.M){
             if(checkCAMERAPermission()){
                 mcamera = android.hardware.Camera.open();
@@ -116,13 +117,13 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                intent.putExtra("gpsinfo",gps);
                 startActivity(intent);
                 finish();
             }
         });
 
         TextView textview = findViewById(R.id.text);
-        textview.setText("우회전");
         textview.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -275,10 +276,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     void changeArrow(ImageView arrowView, TextView text_msg){
         String msg = (String) text_msg.getText();
 
-        if(msg.indexOf("좌회전")>=0){
+        if(msg.indexOf("왼쪽")>=0){
             arrowView.setImageResource(R.drawable.back);
         }
-        else if(msg.indexOf("우회전")>=0){
+        else if(msg.indexOf("오른쪽")>=0){
             arrowView.setImageResource(R.drawable.next);
         }
         else{

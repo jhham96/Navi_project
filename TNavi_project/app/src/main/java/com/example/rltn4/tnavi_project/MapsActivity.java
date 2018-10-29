@@ -63,11 +63,16 @@ public class MapsActivity extends AppCompatActivity {
         percent_proBar.setMax(100);
         percent_proBar.setProgress(80);
 
+        /*test*/
+        if(getIntent().getSerializableExtra("gpsinfo")==null) {
+            gps = new GpsInfo(getApplicationContext());
+        }
         change_btn = (Button)findViewById(R.id.button1);
         change_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
+                intent.putExtra("gpsinfo",gps);
                 startActivity(intent);
                 finish();
             }

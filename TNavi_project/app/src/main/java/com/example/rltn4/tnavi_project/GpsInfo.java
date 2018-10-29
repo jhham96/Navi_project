@@ -24,9 +24,10 @@ import com.skt.Tmap.TMapMarkerItem;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class GpsInfo extends Service implements LocationListener {
+public class GpsInfo extends Service implements LocationListener, Serializable {
 
     private final Context mContext;
     private TMapView tMapView;
