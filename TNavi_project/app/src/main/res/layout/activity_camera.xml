@@ -50,7 +50,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:layout_weight="10">
+        android:layout_weight="10"
+        android:background="@color/colorSky">
+
         <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
             android:id="@+id/percent"
@@ -59,18 +61,37 @@
             android:indeterminateOnly="false"
             android:max="100"
             android:layout_weight="1"/>
+
         <Button
             android:id="@+id/mode_switch"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="3" />
+            android:layout_marginTop="3dp"
+            android:layout_weight="3"
+            android:background="@drawable/rounded"
+            android:text="지도 모드"
+            android:textColor="@android:color/background_light"
+            android:textSize="18dp"/>
     </LinearLayout>
 
-    <TextView
-        android:id = "@+id/text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="10"
-        android:background="@android:color/holo_blue_bright"/>
+        android:background="@color/colorSky">
 
+        <TextView
+            android:id = "@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_marginTop="2dp"
+            android:paddingLeft="7dp"
+            android:textSize="18dp"
+            android:textColor="@android:color/background_light"
+            android:background="@drawable/rounded"/>
+
+    </LinearLayout>
 </LinearLayout>

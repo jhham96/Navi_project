@@ -10,31 +10,55 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2"
-        android:background="@android:color/holo_red_dark"/>
+        android:background="@android:color/holo_red_dark" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:layout_weight="10">
+        android:layout_weight="10"
+        android:background="@color/colorSky"
+        android:orientation="horizontal">
+
         <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
             android:id="@+id/percent"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:indeterminateOnly="false"
-            android:max="100"
-            android:layout_weight="1"/>
+            android:max="100" />
 
         <Button
             android:id="@+id/button1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="3" />
+            android:layout_marginTop="3dp"
+            android:layout_weight="3"
+            android:background="@drawable/rounded"
+            android:text="카메라 모드"
+            android:textColor="@android:color/background_light"
+            android:textSize="18dp" />
+
     </LinearLayout>
-    <TextView
-        android:id="@+id/textView"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="10"
-        android:background="@android:color/holo_blue_bright"/>
+        android:background="@color/colorSky">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_marginTop="2dp"
+            android:paddingLeft="7dp"
+            android:textSize="18dp"
+            android:textColor="@android:color/background_light"
+            android:background="@drawable/rounded" />
+
+    </LinearLayout>
 </LinearLayout>
