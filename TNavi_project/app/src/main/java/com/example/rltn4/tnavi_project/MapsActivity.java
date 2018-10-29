@@ -103,7 +103,7 @@ public class MapsActivity extends AppCompatActivity {
 
             gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
             gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
-            gps.setProgressbar(percent_proBar);
+
             Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
 
         } else {
@@ -286,7 +286,7 @@ public class MapsActivity extends AppCompatActivity {
                     // GPS 관련 정보를 설정한다.
                     gps.setMessageList(messageList);
                     gps.setPointList(pointList);
-
+                    gps.setProgressbar(percent_proBar);
                     (MapsActivity.this).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

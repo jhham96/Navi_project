@@ -218,6 +218,7 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
     public void onLocationChanged(Location location) {
         // TODO Auto-generated method stub
 
+        try{
         tMapView.removeMarkerItem("currentPoint"); // 기존 마커를 제거한다.
         TMapPoint currentPoint = new TMapPoint(location.getLatitude(), location.getLongitude());
         TMapMarkerItem currentMarker = new TMapMarkerItem();
@@ -248,7 +249,7 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
                     builder.setPositiveButton("예",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ((Activity)mContext).finish();
+                                    ((Activity) mContext).finish();
                                 }
                             });
                     builder.setNegativeButton("아니오",
@@ -278,7 +279,7 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
                     builder.setPositiveButton("예",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ((Activity)mContext).finish();
+                                    ((Activity) mContext).finish();
                                 }
                             });
                     builder.setNegativeButton("아니오",
@@ -300,8 +301,11 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
 //        // pointList 크기를 출력한다.
 //        Log.d("pointList.size()", Integer.toString(pointList.size()));
 
-        Toast.makeText(mContext, "currentPoint: " + Double.toString(location.getLatitude()) + ", " + Double.toString(location.getLongitude()) + "\n" + "provider: " + location.getProvider(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(mContext, "currentPoint: " + Double.toString(location.getLatitude()) + ", " + Double.toString(location.getLongitude()) + "\n" + "provider: " + location.getProvider(), Toast.LENGTH_SHORT).show();
 //        Log.d("currentpoint: ", Double.toString(getLatitude()) + ", " + Double.toString(getLongitude()));
+        }catch (NullPointerException e){
+//            Toast.makeText(mContext, "GPS를 인식할 수 없습니다. 건물 밑에서 나와 주세요.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -332,15 +336,16 @@ public class GpsInfo extends Service implements LocationListener, Serializable {
 
     public void setMessageList(ArrayList<String> a) {
         messageList = a;
-        checkpoint_num = messageList.size();
-        proBar.setMax(checkpoint_num);
     }
 
     public void setPointList(ArrayList<TMapPoint> a) {
         pointList = a;
     }
 
-    public void setProgressbar(ProgressBar percent_proBar){ proBar = percent_proBar;}
+    public void setProgressbar(ProgressBar percent_proBar){
+        proBar = percent_proBar;
+        checkpoint_num = messageList.size();
+        proBar.setMax(checkpoint_num);}
 
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
 
