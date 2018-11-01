@@ -74,7 +74,7 @@ public class MapsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
-                intent.putExtra("gpsinfo",gps);
+         //       intent.putExtra("gpsinfo",gps);
                 startActivity(intent);
                 finish();
             }
