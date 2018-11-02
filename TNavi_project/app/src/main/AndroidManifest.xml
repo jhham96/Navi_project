@@ -35,6 +35,7 @@
             android:name=".SetLocationActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustPan" />
         <activity android:name=".ShowRelatedResultActivity"></activity>
+        <activity android:name=".SubMapsActivity"></activity>
     </application>
 
 </manifest>

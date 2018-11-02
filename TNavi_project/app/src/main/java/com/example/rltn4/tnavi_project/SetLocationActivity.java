@@ -85,6 +85,23 @@ public class SetLocationActivity extends AppCompatActivity {
 
         initHistory();  // history 초기화
 
+//        // -------------------- 수 정 --------------------
+//        // adapter에 추가한다.
+//        adapter.insert("중앙대학교", 0);
+//
+//        if(adapter.getCount() > 19) {
+//            adapter.remove(adapter.getItem(19));    // 20개가 넘어가면 맨 마지막에 있는 것들을 삭제하도록 한다.
+//        }
+//
+//        // 다음 ShowRelatedResultActivity로 넘어간다.
+//        Intent intent = new Intent(getApplicationContext(), ShowRelatedResultActivity.class);
+//        intent.putExtra("location", "중앙대학교");         // 다음 엑티비티로 넘어가기전, 결과값을 넘겨주기 위해 intent에 edit창의 내용을 저장한다.
+//        intent.putExtra("value", is_start_or_finish);                         // MainActivity에서 받은 Intent정보를 받아 계속 전달한다.(메인 엑티비티로 되돌아갈시, 이게 출발데이터인지, 도착데이터인지 구분하기 위해)
+//
+//        startActivityForResult(intent,3);
+//
+//        // ----------------------------------------------
+
 
         // back button 초기화
         imageButton = (ImageButton) findViewById(R.id.backButton);

@@ -42,6 +42,20 @@ public class ShowRelatedResultActivity extends AppCompatActivity {
     private ImageButton imageButton;
 
 
+    // ------------------------------ 수 정 -------------------------------
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+//        Log.i("intent22222222",String.format("%s",((TMapBox)data.getSerializableExtra("data")).getName()));
+        if(resultCode == 100) {
+            setResult(100,data);
+            finish();
+        } else if(resultCode == 300) {
+            ;
+        }
+    }
+    // ---------------------------------------------------------------------
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +129,31 @@ public class ShowRelatedResultActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // ------------------------------- 수정 전 -------------------------------
+//                // 클릭한 데이터 값 가져오기
+//                TMapPOIItem item_tmp = (TMapPOIItem) parent.getItemAtPosition(position);
+//                TMapBox tMapBox = new TMapBox();
+//
+//                tMapBox.setLat(item_tmp.getPOIPoint().getLatitude());
+//                tMapBox.setLon(item_tmp.getPOIPoint().getLongitude());
+//                tMapBox.setName(item_tmp.getPOIName());
+//
+////                TMapPOIItem_child item = new TMapPOIItem_child();
+////                item.settMapPOIItem(item_tmp);
+//
+//                // 데이터를 MainActivity에 넘겨주기 위해 Intent 생성 후 MainActivity시작
+//                Intent intent = new Intent();
+//                intent.putExtra("value", is_start_or_finish);
+//                intent.putExtra("data", tMapBox);
+//
+//                // 메인 엑티비티로 이동하기 전, 이전 엑티비티인 검색 엑티비티, 검색결과 엑티비티를 종료시킨다.
+////                intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+//
+//                setResult(100,intent);
+//                finish();
+
+                // ----------------------------------------------------------------------
+                // ------------------------------- 수정 후 -------------------------------
                 // 클릭한 데이터 값 가져오기
                 TMapPOIItem item_tmp = (TMapPOIItem) parent.getItemAtPosition(position);
                 TMapBox tMapBox = new TMapBox();
@@ -123,20 +162,14 @@ public class ShowRelatedResultActivity extends AppCompatActivity {
                 tMapBox.setLon(item_tmp.getPOIPoint().getLongitude());
                 tMapBox.setName(item_tmp.getPOIName());
 
-//                TMapPOIItem_child item = new TMapPOIItem_child();
-//                item.settMapPOIItem(item_tmp);
-
-                // 데이터를 MainActivity에 넘겨주기 위해 Intent 생성 후 MainActivity시작
-                Intent intent = new Intent();
+                // 데이터를 SubMapsActivity에 넘겨 주기 위해 Intent 생성 후 SubMapsActivity 시작
+                Intent intent = new Intent(ShowRelatedResultActivity.this, SubMapsActivity.class);
                 intent.putExtra("value", is_start_or_finish);
                 intent.putExtra("data", tMapBox);
 
-                // 메인 엑티비티로 이동하기 전, 이전 엑티비티인 검색 엑티비티, 검색결과 엑티비티를 종료시킨다.
-//                intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+                startActivityForResult(intent, 3);
 
-                setResult(100,intent);
-                finish();
-
+                // ----------------------------------------------------------------------
             }
         });
 

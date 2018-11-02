@@ -73,10 +73,10 @@ public class MapsActivity extends AppCompatActivity {
         change_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
-                intent.putExtra("gpsinfo",gps);
-                startActivity(intent);
-                finish();
+//                Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
+//                intent.putExtra("gpsinfo",gps);
+//                startActivity(intent);
+//                finish();
             }
         });
 
