@@ -12,7 +12,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -88,10 +90,6 @@ public class MapsActivity extends AppCompatActivity {
         percent_proBar = (ProgressBar)findViewById(R.id.percent);
         percent_proBar.setIndeterminate(false);
 
-        // 서비스와 연결한다.
-        Intent intent = new Intent(MapsActivity.this, TService.class);
-        bindService(intent, conn, Context.BIND_AUTO_CREATE);
-
         change_btn = (Button)findViewById(R.id.button1);
         change_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,17 +102,25 @@ public class MapsActivity extends AppCompatActivity {
 
 //        gps = new GpsInfo(this);
 
-        // 인텐트로 전달 받은 것을 받아 선언한다.
-        final ListViewItem listViewItem = (ListViewItem) getIntent().getSerializableExtra("Location");
+        // 서비스와 연결한다.
+        Intent intent = new Intent(MapsActivity.this, TService.class);
+        bindService(intent, conn, Context.BIND_AUTO_CREATE);
 
-        final TextView textView = (TextView) findViewById(R.id.textView);
+        Handler handler = new Handler(){
+            public void handleMessage(Message msg){
+                super.handleMessage(msg);
+                try {
+                    // 인텐트로 전달 받은 것을 받아 선언한다.
+                    final ListViewItem listViewItem = (ListViewItem) getIntent().getSerializableExtra("Location");
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker);
-        bitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, false); // 마커 아이콘 사이즈 조정
+                    final TextView textView = (TextView) findViewById(R.id.textView);
 
-        if (!isPermission) {
-            callPermission();
-        }
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.marker);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, false); // 마커 아이콘 사이즈 조정
+
+                    if (!isPermission) {
+                        callPermission();
+                    }
 
 //        if (gps.isGetLocation()) {
 //
@@ -139,34 +145,31 @@ public class MapsActivity extends AppCompatActivity {
 //        // 화면 중심을 GPS 로 한다.
 //        tMapView.setCenterPoint(gps.getLongitude(), gps.getLatitude());
 
-        if (tService.isGetLocation()) {
+                    if (tService.isGetLocation()) {
 
-            TMapPoint currentPoint = new TMapPoint(tService.getLatitude(), tService.getLongitude());
-            TMapMarkerItem currentMarker = new TMapMarkerItem();
+                        TMapPoint currentPoint = new TMapPoint(tService.getLatitude(), tService.getLongitude());
+                        TMapMarkerItem currentMarker = new TMapMarkerItem();
 
-            currentMarker.setIcon(bitmap); // 마커 아이콘 지정
-            currentMarker.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
-            currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
-            tMapView.addMarkerItem("currentPoint", currentMarker); // 지도에 마커 추가
+                        currentMarker.setIcon(bitmap); // 마커 아이콘 지정
+                        currentMarker.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
+                        currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
+                        tMapView.addMarkerItem("currentPoint", currentMarker); // 지도에 마커 추가
 
-            tService.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
-            tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
+                        tService.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
+                        tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
 
-            Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
 
-        } else {
-            // GPS 설정을 확인한다.
-            tService.showSettingsAlert();
-        }
+                    } else {
+                        // GPS 설정을 확인한다.
+                        tService.showSettingsAlert();
+                    }
 
-        // 화면 중심을 GPS 로 한다.
-        tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
+                    // 화면 중심을 GPS 로 한다.
+                    tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
 
 //        Log.d("currentpoint: ", Double.toString(gps.getLatitude()) + ", " + Double.toString(gps.getLongitude()));
 
-        new Thread() {
-            public void run() {
-                try {
 //                    ArrayList<TMapPOIItem> tMapPOIItemStartList = tMapData.findAllPOI("중앙대학교 병원"); // 출발지 검색을 위한 변수이다.
 //                    ArrayList<TMapPOIItem> tMapPOIItemEndList = tMapData.findAllPOI("흑석역"); // 도착지 검색을 위한 변수이다.
 //
@@ -380,8 +383,15 @@ public class MapsActivity extends AppCompatActivity {
                 } catch(org.xml.sax.SAXException e) {
                     Log.e("SAXException: ", "org.xml.sax.SAXException");
                 }
+
+//        new Thread() {
+//            public void run() {
+//
+//            }
+//        }.start();
             }
-        }.start();
+        };
+        handler.sendEmptyMessageDelayed(0,2000); // 3초 딜레이
     }
 
     @Override
