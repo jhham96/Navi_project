@@ -2,17 +2,13 @@ package com.example.rltn4.tnavi_project;
 
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -35,7 +31,7 @@ public class MapsActivity extends AppCompatActivity {
 
     private TMapView tMapView;
     private TMapData tMapData;
-//    private GpsInfo gps;
+    private GpsInfo gps;
     private final int PERMISSIONS_ACCESS_FINE_LOCATION = 1000;
     private final int PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
     private boolean isAccessFineLocation = false;
@@ -45,29 +41,6 @@ public class MapsActivity extends AppCompatActivity {
     private ProgressBar percent_proBar;
 
     private ArrayList<String> messageList;
-
-    private TService tService; // 서비스 변수이다.
-    private boolean isService = false; // 서비스 중인지 확인하는 변수이다.
-
-    private ServiceConnection conn = new ServiceConnection() {
-        public void onServiceConnected(ComponentName name,
-                                       IBinder service) {
-            // 서비스와 연결되었을 때 호출되는 메서드
-            // 서비스 객체를 전역변수로 저장
-            TService.LocalBinder mb = (TService.LocalBinder) service;
-            tService = mb.getService(); // 서비스가 제공하는 메소드 호출하여
-            // 서비스쪽 객체를 전달받을수 있슴
-            isService = true;
-        }
-
-        public void onServiceDisconnected(ComponentName name) {
-            // 서비스와 연결이 끊겼을 때 호출되는 메서드
-            isService = false;
-            Toast.makeText(getApplicationContext(),
-                    "서비스 연결 해제",
-                    Toast.LENGTH_LONG).show();
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,26 +61,27 @@ public class MapsActivity extends AppCompatActivity {
         percent_proBar = (ProgressBar)findViewById(R.id.percent);
         percent_proBar.setIndeterminate(false);
 
-        // 서비스와 연결한다.
-        Intent intent = new Intent(MapsActivity.this, TService.class);
-        bindService(intent, conn, Context.BIND_AUTO_CREATE);
 
+        // 인텐트로 전달 받은 것을 받아 선언한다.
+        final ListViewItem listViewItem = (ListViewItem) getIntent().getSerializableExtra("Location");
+
+        /*test*/
+        if(getIntent().getSerializableExtra("gpsinfo")==null) {
+            gps = new GpsInfo(getApplicationContext());
+        }
         change_btn = (Button)findViewById(R.id.button1);
         change_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
-
+//                intent.putExtra("gpsinfo",gps);
                 startActivity(intent);
                 finish();
 
             }
         });
 
-//        gps = new GpsInfo(this);
-
-        // 인텐트로 전달 받은 것을 받아 선언한다.
-        final ListViewItem listViewItem = (ListViewItem) getIntent().getSerializableExtra("Location");
+        gps = new GpsInfo(this);
 
         final TextView textView = (TextView) findViewById(R.id.textView);
 
@@ -118,32 +92,9 @@ public class MapsActivity extends AppCompatActivity {
             callPermission();
         }
 
-//        if (gps.isGetLocation()) {
-//
-//            TMapPoint currentPoint = new TMapPoint(gps.getLatitude(), gps.getLongitude());
-//            TMapMarkerItem currentMarker = new TMapMarkerItem();
-//
-//            currentMarker.setIcon(bitmap); // 마커 아이콘 지정
-//            currentMarker.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
-//            currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
-//            tMapView.addMarkerItem("currentPoint", currentMarker); // 지도에 마커 추가
-//
-//            gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
-//            gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
-//
-//            Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
-//
-//        } else {
-//            // GPS 설정을 확인한다.
-//            gps.showSettingsAlert();
-//        }
-//
-//        // 화면 중심을 GPS 로 한다.
-//        tMapView.setCenterPoint(gps.getLongitude(), gps.getLatitude());
+        if (gps.isGetLocation()) {
 
-        if (tService.isGetLocation()) {
-
-            TMapPoint currentPoint = new TMapPoint(tService.getLatitude(), tService.getLongitude());
+            TMapPoint currentPoint = new TMapPoint(gps.getLatitude(), gps.getLongitude());
             TMapMarkerItem currentMarker = new TMapMarkerItem();
 
             currentMarker.setIcon(bitmap); // 마커 아이콘 지정
@@ -151,18 +102,18 @@ public class MapsActivity extends AppCompatActivity {
             currentMarker.setTMapPoint(currentPoint); // 마커의 좌표 지정
             tMapView.addMarkerItem("currentPoint", currentMarker); // 지도에 마커 추가
 
-            tService.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
-            tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
+            gps.setMarkerItem(tMapView, bitmap); // 마크를 갱신할 수 있도록 설정한다.
+            gps.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
 
             Toast.makeText(getApplicationContext(), "GPS를 시작합니다.", Toast.LENGTH_SHORT).show();
 
         } else {
             // GPS 설정을 확인한다.
-            tService.showSettingsAlert();
+            gps.showSettingsAlert();
         }
 
         // 화면 중심을 GPS 로 한다.
-        tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
+        tMapView.setCenterPoint(gps.getLongitude(), gps.getLatitude());
 
 //        Log.d("currentpoint: ", Double.toString(gps.getLatitude()) + ", " + Double.toString(gps.getLongitude()));
 
@@ -333,22 +284,10 @@ public class MapsActivity extends AppCompatActivity {
                         Log.d("message", messageList.get(i));
                     }
 
-//                    // GPS 관련 정보를 설정한다.
-//                    gps.setMessageList(messageList);
-//                    gps.setPointList(pointList);
-//                    gps.setProgressbar(percent_proBar);
-//                    (MapsActivity.this).runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            textView.setText(messageList.get(0));
-//                            TTS tts = new TTS(MapsActivity.this, messageList.get(0));
-//                        }
-//                    });
-
                     // GPS 관련 정보를 설정한다.
-                    tService.setMessageList(messageList);
-                    tService.setPointList(pointList);
-                    tService.setProgressbar(percent_proBar);
+                    gps.setMessageList(messageList);
+                    gps.setPointList(pointList);
+                    gps.setProgressbar(percent_proBar);
                     (MapsActivity.this).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -384,15 +323,6 @@ public class MapsActivity extends AppCompatActivity {
                 }
             }
         }.start();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(isService){
-            unbindService(conn); // 서비스 종료
-            isService = false;
-        }
     }
 
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
