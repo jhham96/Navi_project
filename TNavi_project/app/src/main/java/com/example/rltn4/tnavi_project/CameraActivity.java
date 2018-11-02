@@ -11,6 +11,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -31,6 +32,7 @@ import android.widget.Toast;
 import java.io.IOException;
 
 import static android.Manifest.permission_group.CAMERA;
+import static java.lang.StrictMath.abs;
 
 public class CameraActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
@@ -43,6 +45,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private ProgressBar percent_proBar;
 
     private ImageView arrow_img;
+    private ImageView destination_img;
 
     private SensorManager mySensorManager; // 센서 매니저
     private SensorEventListener magnetic_Listener; // 센서 리스너
@@ -83,6 +86,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private float a = 0.2f;
 
     private GpsInfo gps;
+
+    private Location tlocation; // gps를 아직 못가져와서 넣어놈
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,6 +112,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         surfaceCreated(surfaceHolder);
 
         arrow_img = (ImageView)findViewById(R.id.arrow);
+        destination_img = (ImageView)findViewById(R.id.destination);
 
         percent_proBar = (ProgressBar)findViewById(R.id.percent);
         percent_proBar.setIndeterminate(false);
@@ -117,7 +124,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-                intent.putExtra("gpsinfo",gps);
+         //       intent.putExtra("gpsinfo",gps);
                 startActivity(intent);
                 finish();
             }
@@ -231,9 +238,15 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                                 building_text.setText("건물있당!");
                                 building_text.setX((float)(width-width*(handling_x-20)/20));
                             }
+                            else if(handling_x >= 180 && handling_x <=200){
+                                destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                destination_img.setX((float)(width-width*(handling_x-180)/20));
+                            }
                             else{
                                 building_text.setText("");
+                            //    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
                             }
+
                         }
                     }
                 }
@@ -246,6 +259,32 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
             }
         };
+    }
+
+    //목적지 팔로잉 각도
+    public double destiny_angle(double latitude, double longitude){
+        double my_latitude = 0.0;
+        double my_longitude = 0.0; // gps info 에서 가져옴
+        double standard_latitude, standard_longitude; // 가로, 세로
+
+        standard_latitude = my_latitude;
+        standard_longitude = longitude;
+
+        double vector_Latitude = latitude - my_latitude;
+        double vector_Longitude = longitude - my_longitude;
+
+        double vector_standard_latitude = standard_latitude - my_latitude;
+        double vector_standard_longitude = standard_longitude - my_longitude;
+
+        // 각도가 얼마나 변했는지를 표현한다.
+//                        Log.d("angle", Double.toString(Math.asin((vector1_Longitude * vector2_Latitude - vector1_Latitude * vector2_Longitude)
+//                                /(Math.sqrt(Math.pow(vector1_Latitude, 2) + Math.pow(vector1_Longitude, 2)) * Math.sqrt(Math.pow(vector2_Latitude, 2) + Math.pow(vector2_Longitude, 2)))) * 57.2958));
+
+        double angle = (Math.asin((vector_Longitude * vector_standard_latitude - vector_Latitude * vector_standard_longitude)
+                /(Math.sqrt(Math.pow(vector_Latitude, 2) + Math.pow(vector_Longitude, 2)) * Math.sqrt(Math.pow(vector_standard_latitude, 2) + Math.pow(vector_standard_longitude, 2)))) * 57.2958);
+
+        // 특정 각도가 넘는지를 확인한다.
+        return Math.abs(angle);
     }
 
     private void complementary(double new_ts){

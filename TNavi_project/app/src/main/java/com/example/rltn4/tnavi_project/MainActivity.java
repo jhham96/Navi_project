@@ -1,7 +1,9 @@
 package com.example.rltn4.tnavi_project;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
+    final int MY_PERMISSION_REQUEST_CODE = 100;
     // 검색결과 저장할 변수 선언
     private ListViewItem listViewItem;
 
@@ -62,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},MY_PERMISSION_REQUEST_CODE);
 
         listViewItem = new ListViewItem();
 
