@@ -88,7 +88,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private double temp;
     private float a = 0.2f;
 
-    private GpsInfo gps;
+    private float mLowPassY = 0;
+    private float mHighPassY = 0;
+    private float mLastY = 0;
 
     private Location tlocation; // gps를 아직 못가져와서 넣어놈
 
@@ -99,7 +101,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         setContentView(R.layout.activity_camera);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE); // 화면 캡처 방지
 
-        gps = (GpsInfo)getIntent().getSerializableExtra("gpsinfo");
         if (APIVersion >= android.os.Build.VERSION_CODES.M){
             if(checkCAMERAPermission()){
                 mcamera = android.hardware.Camera.open();
@@ -219,13 +220,19 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         double gyroZ = sensorEvent.values[2];
                         double text = 0.0;
 
+                        /* 로우패스필터 */
+                        mLowPassY = lowPass((float)gyroY,mLowPassY);
+                        /* 하이패스 필터*/
+                        mHighPassY = highPass(mLowPassY,mLastY,mHighPassY);
+                        mLastY = mLowPassY;
+
                         /* 단위시간 계산 */
                         dt = (sensorEvent.timestamp - timestamp) * NS2S;
                         timestamp = sensorEvent.timestamp;
 
                         /* 시간이 변화했으면 */
                         if (dt - timestamp * NS2S != 0) {
-                            pitch = pitch + gyroY * dt;
+                            pitch = pitch + mHighPassY * dt;
                             /*
                             roll = roll + gyroX * dt;
                             yaw = yaw + gyroZ * dt;
@@ -265,6 +272,13 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         };
     }
 
+    float lowPass(float current, float last){
+        return (float)(last*(1.0f-0.1)+current*0.1);
+    }
+
+    float highPass(float current, float last, float filtered){
+        return (float)(0.1*(filtered+current-last));
+    }
     //목적지 팔로잉 각도
     public double destiny_angle(double latitude, double longitude){
         double my_latitude = 0.0;
