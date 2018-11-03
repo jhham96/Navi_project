@@ -13,6 +13,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -23,6 +25,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.ImageView;
@@ -94,6 +97,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE); // 화면 캡처 방지
+
         gps = (GpsInfo)getIntent().getSerializableExtra("gpsinfo");
         if (APIVersion >= android.os.Build.VERSION_CODES.M){
             if(checkCAMERAPermission()){
@@ -244,9 +249,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             }
                             else{
                                 building_text.setText("");
-                            //    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
+                                destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
                             }
-
                         }
                     }
                 }
@@ -312,7 +316,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         temp = (1/a) * (mAccPitch - pitch) + mGyroValues[1];
         pitch = pitch + (temp*dt);
     }
-    void changeArrow(ImageView arrowView, TextView text_msg){
+    void changeArrow(final ImageView arrowView, TextView text_msg){
         String msg = (String) text_msg.getText();
 
         if(msg.indexOf("왼쪽")>=0){
@@ -324,6 +328,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         else{
             arrowView.setImageResource(R.drawable.uparrow);
         }
+        Handler handler = new Handler(){
+            public void handleMessage(Message msg){
+                arrowView.setImageResource(R.drawable.blank);
+            }
+        };
+        handler.sendEmptyMessageDelayed(0,3000); // 3초 딜레이
     }
 
     protected void onResume() {
