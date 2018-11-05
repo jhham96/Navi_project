@@ -1,24 +1,32 @@
 package com.example.rltn4.tnavi_project;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -29,7 +37,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.skt.Tmap.TMapData;
+import com.skt.Tmap.TMapMarkerItem;
+import com.skt.Tmap.TMapPoint;
+import com.skt.Tmap.TMapPolyLine;
+
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static android.Manifest.permission_group.CAMERA;
 import static java.lang.StrictMath.abs;
@@ -89,6 +103,29 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     private Location tlocation; // gps를 아직 못가져와서 넣어놈
 
+    private TService tService; // 서비스 변수이다.
+    private boolean isService = false; // 서비스 중인지 확인하는 변수이다.
+
+    private ServiceConnection conn = new ServiceConnection() {
+        public void onServiceConnected(ComponentName name,
+                                       IBinder service) {
+            // 서비스와 연결되었을 때 호출되는 메서드
+            // 서비스 객체를 전역변수로 저장
+            TService.LocalBinder mb = (TService.LocalBinder) service;
+            tService = mb.getService(); // 서비스가 제공하는 메소드 호출하여
+            // 서비스쪽 객체를 전달받을수 있슴
+            isService = true;
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            // 서비스와 연결이 끊겼을 때 호출되는 메서드
+            isService = false;
+            Toast.makeText(getApplicationContext(),
+                    "서비스 연결 해제",
+                    Toast.LENGTH_LONG).show();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,45 +154,41 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         percent_proBar = (ProgressBar)findViewById(R.id.percent);
         percent_proBar.setIndeterminate(false);
         percent_proBar.setMax(100);
-        percent_proBar.setProgress(80);
 
         mode_switch_btn = (Button) findViewById(R.id.mode_switch);
         mode_switch_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+//                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
          //       intent.putExtra("gpsinfo",gps);
-                startActivity(intent);
+//                startActivity(intent);
                 finish();
             }
         });
 
-        TextView textview = findViewById(R.id.text);
-        textview.setOnClickListener(new View.OnClickListener(){
+        final TextView textView = findViewById(R.id.text);
 
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CameraActivity.this);
-                builder.setTitle("AlertDialog Title");
-                builder.setMessage("AlertDialog Content");
-                builder.setPositiveButton("예",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                builder.setNegativeButton("아니오",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                builder.show();
-            }
-        });
+        // 서비스와 연결한다.
+        Intent intent = new Intent(CameraActivity.this, TService.class);
+        bindService(intent, conn, Context.BIND_AUTO_CREATE);
+
+        // 생성 시, Dialog 나타나게 설정한다.
+        AlertDialog.Builder builder = new AlertDialog.Builder(CameraActivity.this);
+        builder.setTitle("카메라 모드를 시작하겠습니다.");
+        builder.setMessage("주변을 잘 살펴보시길 바랍니다.");
+        builder.setPositiveButton("예",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
+                        tService.setProgressbar(percent_proBar);
+                        textView.setText(tService.getMessage());
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
 
         // textview 메세지에 따라 화살표 변경 추후에 메세지 변경하는 함수에 넣어서 호출
-        changeArrow(arrow_img,textview);
+        changeArrow(arrow_img,textView);
 
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);

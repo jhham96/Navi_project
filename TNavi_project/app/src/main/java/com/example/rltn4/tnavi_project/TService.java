@@ -32,32 +32,32 @@ import java.util.ArrayList;
 public class TService extends Service implements LocationListener{
     private final IBinder mBinder = new LocalBinder();
 
-    private Context mContext;
-    private TMapView tMapView;
-    private ProgressBar proBar;
-    private Bitmap bitmap;
-    private TextView textView;
-    private boolean flag; // 거리가 점점 가까워지거나 멀어질 경우에 대해 true, false 를 갖는 변수이다.
+    private static Context mContext;
+    private static TMapView tMapView;
+    private static ProgressBar proBar;
+    private static Bitmap bitmap;
+    private static TextView textView;
+    private static boolean flag; // 거리가 점점 가까워지거나 멀어질 경우에 대해 true, false 를 갖는 변수이다.
     //    private int count;
-    private int pIndex;
-    private int mIndex;
-    private ArrayList<TMapPoint> pointList;
-    private ArrayList<String> messageList;
-    private int checkpoint_num; // 총 체크포인트 개수
+    private static int pIndex;
+    private static int mIndex;
+    private static ArrayList<TMapPoint> pointList;
+    private static ArrayList<String> messageList;
+    private static int checkpoint_num; // 총 체크포인트 개수
 
     // 현재 GPS 사용 유무
-    boolean isGPSEnabled = false;
+    private static boolean isGPSEnabled = false;
 
     // 네트워크 사용 유무
-    boolean isNetworkEnabled = false;
+    private static boolean isNetworkEnabled = false;
 
     // Location 변수를 할당할 수 있는지 유무
-    boolean isGetLocation = false;
+    private static boolean isGetLocation = false;
 
     // 위도, 경도 정보를 담고 있는 변수이다.
-    Location tlocation;
-    double lat; // 위도
-    double lon; // 경도
+    private static Location tlocation;
+    private static double lat; // 위도
+    private static double lon; // 경도
 
     // 최소 GPS 정보 업데이트 거리 4미터
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 4;
@@ -65,7 +65,7 @@ public class TService extends Service implements LocationListener{
     // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 5초
     private static final long MIN_TIME_BW_UPDATES = 1000 * 5;
 
-    protected LocationManager locationManager;
+    protected static LocationManager locationManager;
 
     class LocalBinder extends Binder {
         TService getService() {
@@ -198,31 +198,31 @@ public class TService extends Service implements LocationListener{
         return this.isGetLocation;
     }
 
-    // SettingAlert를 보여 준다.
-    public void showSettingsAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-
-        alertDialog.setTitle("GPS Setting");
-        alertDialog.setMessage("GPS 설정이 안 되어 있는 것 같습니다. \n 설정을 확인하시겠습니까?");
-
-        // Setting을 누르게 되면 설정창으로 이동합니다.
-        alertDialog.setPositiveButton("Settings",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,int which) {
-                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        mContext.startActivity(intent);
-                    }
-                });
-        // Cancel 하면 종료 합니다.
-        alertDialog.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-        alertDialog.show();
-    }
+//    // SettingAlert를 보여 준다.
+//    public void showSettingsAlert(){
+//        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+//
+//        alertDialog.setTitle("GPS Setting");
+//        alertDialog.setMessage("GPS 설정이 안 되어 있는 것 같습니다. \n 설정을 확인하시겠습니까?");
+//
+//        // Setting을 누르게 되면 설정창으로 이동합니다.
+//        alertDialog.setPositiveButton("Settings",
+//                new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog,int which) {
+//                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                        mContext.startActivity(intent);
+//                    }
+//                });
+//        // Cancel 하면 종료 합니다.
+//        alertDialog.setNegativeButton("Cancel",
+//                new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.cancel();
+//                    }
+//                });
+//
+//        alertDialog.show();
+//    }
 
     public void onLocationChanged(Location location) {
         // TODO Auto-generated method stub
@@ -242,7 +242,7 @@ public class TService extends Service implements LocationListener{
                 Log.d("messageList", "messageList is live");
 
                 // 현재 위치와 터닝 포인트가 가까워질 때, message 갱신한다.
-                if (distance(location.getLatitude(), location.getLongitude(), pointList.get(pIndex).getLatitude(), pointList.get(pIndex).getLongitude(), "meter") < 5 && flag) {
+                if (distance(location.getLatitude(), location.getLongitude(), pointList.get(pIndex).getLatitude(), pointList.get(pIndex).getLongitude(), "meter") < 7 && flag) {
                     mIndex++;
                     flag = false;
                     proBar.setProgress(mIndex);
@@ -275,7 +275,7 @@ public class TService extends Service implements LocationListener{
                 }
 
                 // 현재 위치와 터닝 포인트가 멀어질 때, message 갱신한다.
-                if (distance(location.getLatitude(), location.getLongitude(), pointList.get(pIndex).getLatitude(), pointList.get(pIndex).getLongitude(), "meter") > 5 && !flag) {
+                if (distance(location.getLatitude(), location.getLongitude(), pointList.get(pIndex).getLatitude(), pointList.get(pIndex).getLongitude(), "meter") > 7 && !flag) {
 //                mIndex++;
 //                pIndex++;
                     flag = true;
@@ -350,6 +350,8 @@ public class TService extends Service implements LocationListener{
     public void setMessageList(ArrayList<String> a) {
         messageList = a;
     }
+
+    public String getMessage() { return messageList.get(mIndex); }
 
     public void setPointList(ArrayList<TMapPoint> a) {
         pointList = a;
