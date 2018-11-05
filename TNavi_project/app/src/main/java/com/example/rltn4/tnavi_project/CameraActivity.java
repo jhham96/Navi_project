@@ -1,38 +1,52 @@
 package com.example.rltn4.tnavi_project;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Point;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.view.Display;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.skt.Tmap.TMapData;
+import com.skt.Tmap.TMapMarkerItem;
+import com.skt.Tmap.TMapPoint;
+import com.skt.Tmap.TMapPolyLine;
+
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static android.Manifest.permission_group.CAMERA;
+import static java.lang.StrictMath.abs;
 
 public class CameraActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
@@ -43,7 +57,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private int APIVersion = Build.VERSION.SDK_INT;
     private Button mode_switch_btn;
     private ProgressBar percent_proBar;
+
+    private boolean isCreate;
+
     private ImageView arrow_img;
+    private ImageView destination_img;
 
     private SensorManager mySensorManager; // 센서 매니저
     private SensorEventListener magnetic_Listener; // 센서 리스너
@@ -53,6 +71,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     private float[] mGravity = new float[3];
     private float[] mGeomagnetic = new float[3];
+    private float[] mGyroValues = new float[3];
     private float[] Rotation = new float[9];
     private float[] I = new float[9];
 
@@ -75,12 +94,46 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private double handling_x;
 
     int width;
+
+    private boolean gyroRunning;
+    private boolean accRunning;
+    private double mAccPitch, mAccRoll;
+    private double temp;
+    private float a = 0.2f;
+
+    private GpsInfo gps;
+
+    private Location tlocation; // gps를 아직 못가져와서 넣어놈
+
+    private TService tService; // 서비스 변수이다.
+    private boolean isService = false; // 서비스 중인지 확인하는 변수이다.
+
+    private ServiceConnection conn = new ServiceConnection() {
+        public void onServiceConnected(ComponentName name,
+                                       IBinder service) {
+            // 서비스와 연결되었을 때 호출되는 메서드
+            // 서비스 객체를 전역변수로 저장
+            TService.LocalBinder mb = (TService.LocalBinder) service;
+            tService = mb.getService(); // 서비스가 제공하는 메소드 호출하여
+            // 서비스쪽 객체를 전달받을수 있슴
+            isService = true;
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            // 서비스와 연결이 끊겼을 때 호출되는 메서드
+            isService = false;
+            Toast.makeText(getApplicationContext(),
+                    "서비스 연결 해제",
+                    Toast.LENGTH_LONG).show();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
-
+        gps = (GpsInfo)getIntent().getSerializableExtra("gpsinfo");
         if (APIVersion >= android.os.Build.VERSION_CODES.M){
             if(checkCAMERAPermission()){
                 mcamera = android.hardware.Camera.open();
@@ -94,58 +147,59 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
         surfaceCreated(surfaceHolder);
 
         arrow_img = (ImageView)findViewById(R.id.arrow);
+        destination_img = (ImageView)findViewById(R.id.destination);
 
         percent_proBar = (ProgressBar)findViewById(R.id.percent);
         percent_proBar.setIndeterminate(false);
         percent_proBar.setMax(100);
-        percent_proBar.setProgress(80);
 
         mode_switch_btn = (Button) findViewById(R.id.mode_switch);
         mode_switch_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+         //       intent.putExtra("gpsinfo",gps);
+//                startActivity(intent);
                 finish();
             }
         });
 
-        TextView textview = findViewById(R.id.text);
-        textview.setText("우회전");
-        textview.setOnClickListener(new View.OnClickListener(){
+        final TextView textView = findViewById(R.id.text);
 
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CameraActivity.this);
-                builder.setTitle("AlertDialog Title");
-                builder.setMessage("AlertDialog Content");
-                builder.setPositiveButton("예",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                builder.setNegativeButton("아니오",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                builder.show();
-            }
-        });
-
-        // textview 메세지에 따라 화살표 변경 추후에 메세지 변경하는 함수에 넣어서 호출
-        changeArrow(arrow_img,textview);
+        // 서비스와 연결한다.
+        Intent intent = new Intent(CameraActivity.this, TService.class);
+        bindService(intent, conn, Context.BIND_AUTO_CREATE);
 
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
         width = metrics.widthPixels;
         building_text = (TextView)findViewById(R.id.building_text);
+
+        // 생성 시, Dialog 나타나게 설정한다.
+        AlertDialog.Builder builder = new AlertDialog.Builder(CameraActivity.this);
+        builder.setTitle("카메라 모드를 시작하겠습니다.");
+        builder.setMessage("주변을 잘 살펴보시길 바랍니다.");
+        builder.setPositiveButton("예",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        isCreate = true;
+                        tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
+                        tService.setProgressbar(percent_proBar);
+                        textView.setText(tService.getMessage());
+                        tService.setFlag(false);
+                        tService.setArrowImg(arrow_img);
+                        tService.setBuilding_text(building_text);
+                        tService.setDestination_img(destination_img);
+                        tService.setWidth(width);
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
         first_x = (TextView)findViewById(R.id.first_x);
         pitch_text = (TextView)findViewById(R.id.pitch);
 
@@ -164,6 +218,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 synchronized (this) {
                     if(isFirst<100) {
                         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                            if(!accRunning){
+                                accRunning=true;
+                            }
                             mGravity[0] = alpha * mGravity[0] + (1 - alpha) * sensorEvent.values[0];
                             mGravity[1] = alpha * mGravity[1] + (1 - alpha) * sensorEvent.values[1];
                             mGravity[2] = alpha * mGravity[2] + (1 - alpha) * sensorEvent.values[2];
@@ -186,10 +243,13 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         isFirst++;
                     }
                     if(sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                        double gyroX = sensorEvent.values[0];
+                        mGyroValues = sensorEvent.values;
+                        if(!gyroRunning){
+                            gyroRunning=true;
+                        }
                         double gyroY = sensorEvent.values[1];
-                        double gyroZ = sensorEvent.values[2];
                         double text = 0.0;
+
                         /* 단위시간 계산 */
                         dt = (sensorEvent.timestamp - timestamp) * NS2S;
                         timestamp = sensorEvent.timestamp;
@@ -197,10 +257,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         /* 시간이 변화했으면 */
                         if (dt - timestamp * NS2S != 0) {
                             pitch = pitch + gyroY * dt;
-                            /*
-                            roll = roll + gyroX * dt;
-                            yaw = yaw + gyroZ * dt;
-                            */
+
                             if(pitch > 0){
                                 text = -(360 + pitch * rad_to_dgr)%360;
                             }
@@ -210,6 +267,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             first_x.setText(String.format("%f",firstMagn));
                             handling_x = (text+firstMagn)%360; // handling_x = 핸드폰 들고 나침반 각도
                             pitch_text.setText(String.format("%f",handling_x));
+<<<<<<< HEAD
                             if(handling_x>=20 && handling_x<=40) {
                                 building_text.setText("건물있당!");
                                 building_text.setX((float)(width-width*(handling_x-20)/20));
@@ -217,8 +275,15 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             else{
                                 building_text.setText("");
                             }
+=======
+                            if(isCreate)
+                                tService.setSight_degree(handling_x);
+>>>>>>> tmp
                         }
                     }
+                }
+                if(gyroRunning&&accRunning){
+                    complementary(sensorEvent.timestamp);
                 }
             }
             @Override
@@ -228,18 +293,30 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         };
     }
 
-    void changeArrow(ImageView arrowView, TextView text_msg){
-        String msg = (String) text_msg.getText();
+    private void complementary(double new_ts){
+        /* 자이로랑 가속 해제 */
+        gyroRunning = false;
+        accRunning = false;
 
-        if(msg.indexOf("좌회전")>=0){
-            arrowView.setImageResource(R.drawable.back);
+        /*센서 값 첫 출력시 dt(=timestamp - event.timestamp)에 오차가 생기므로 처음엔 break */
+        if(timestamp == 0){
+            timestamp = new_ts;
+            return;
         }
-        else if(msg.indexOf("우회전")>=0){
-            arrowView.setImageResource(R.drawable.next);
-        }
-        else{
-            arrowView.setImageResource(R.drawable.uparrow);
-        }
+        dt = (new_ts - timestamp) * NS2S; // ns->s 변환
+        timestamp = new_ts;
+
+        /* degree measure for accelerometer */
+        mAccPitch = -Math.atan2(mGravity[0], mGravity[2]) * 180.0 / Math.PI; // Y 축 기준
+        mAccRoll= Math.atan2(mGravity[1], mGravity[2]) * 180.0 / Math.PI; // X 축 기준
+
+        /**
+         * 1st complementary filter.
+         *  mGyroValuess : 각속도 성분.
+         *  mAccPitch : 가속도계를 통해 얻어낸 회전각.
+         */
+        temp = (1/a) * (mAccPitch - pitch) + mGyroValues[1];
+        pitch = pitch + (temp*dt);
     }
 
     protected void onResume() {

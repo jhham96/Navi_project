@@ -15,62 +15,90 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible" />
-            <RelativeLayout
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="10dp"/>
+            <TextView
+                android:id="@+id/first_x"
+                android:textColor="#FF0000"
+                android:layout_below="@id/arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/pitch"
+                android:textColor="#FF0000"
+                android:layout_below="@id/first_x"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/destination"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/building_text"/>
+            <TextView
+                android:id="@+id/building_text"
+                android:textColor="#FF0000"
+                android:layout_centerVertical="true"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <ImageView
-                    android:id="@+id/arrow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginTop="10dp"/>
-                <TextView
-                    android:id="@+id/first_x"
-                    android:textColor="#FF0000"
-                    android:layout_below="@id/arrow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <TextView
-                    android:id="@+id/pitch"
-                    android:textColor="#FF0000"
-                    android:layout_below="@id/first_x"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-                <TextView
-                    android:id="@+id/building_text"
-                    android:textColor="#FF0000"
-                    android:layout_centerVertical="true"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </RelativeLayout>
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:layout_weight="10">
+        android:layout_weight="10"
+        android:background="@color/colorSky">
+
         <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
             android:id="@+id/percent"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:indeterminateOnly="false"
             android:max="100"
-            android:layout_weight="1"/>
+            android:progressDrawable="@drawable/progressbar" />
+
         <Button
             android:id="@+id/mode_switch"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="3" />
+            android:layout_marginTop="3dp"
+            android:layout_weight="3"
+            android:background="@drawable/rounded"
+            android:text="지도 모드"
+            android:textColor="@android:color/background_light"
+            android:textSize="18dp"/>
     </LinearLayout>
 
-    <TextView
-        android:id = "@+id/text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="10"
-        android:background="@android:color/holo_blue_bright"/>
+        android:background="@color/colorSky">
 
+        <TextView
+            android:id = "@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_marginTop="2dp"
+            android:paddingLeft="7dp"
+            android:textSize="18dp"
+            android:textColor="@android:color/background_light"
+            android:gravity="center_vertical"
+            android:background="@drawable/rounded"/>
+
+    </LinearLayout>
 </LinearLayout>
