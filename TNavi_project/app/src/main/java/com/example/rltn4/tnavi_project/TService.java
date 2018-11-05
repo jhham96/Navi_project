@@ -16,9 +16,11 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ public class TService extends Service implements LocationListener{
     private static ProgressBar proBar;
     private static Bitmap bitmap;
     private static TextView textView;
+    private static ImageView arrow_img;
     private static boolean flag; // 거리가 점점 가까워지거나 멀어질 경우에 대해 true, false 를 갖는 변수이다.
     //    private int count;
     private static int pIndex;
@@ -44,6 +47,9 @@ public class TService extends Service implements LocationListener{
     private static ArrayList<TMapPoint> pointList;
     private static ArrayList<String> messageList;
     private static int checkpoint_num; // 총 체크포인트 개수
+
+    // 현재 액티비티 체크 maps = true, camera = false
+    private static boolean activity_flag;
 
     // 현재 GPS 사용 유무
     private static boolean isGPSEnabled = false;
@@ -67,6 +73,14 @@ public class TService extends Service implements LocationListener{
 
     protected static LocationManager locationManager;
 
+    // 목적지 팔로잉 각도
+    private static double dest_degree = 0.0;
+    private static double sight_degree = 0.0;
+
+    private static TextView building_text;
+    private static ImageView destination_img;
+    private static int width;
+
     class LocalBinder extends Binder {
         TService getService() {
             return TService.this;
@@ -82,6 +96,7 @@ public class TService extends Service implements LocationListener{
     public void onCreate() {
         super.onCreate();
         Toast.makeText(getApplicationContext(), "Service Created", Toast.LENGTH_SHORT).show();
+        activity_flag = true;
         pIndex = 1;
         mIndex = 0;
         flag = true;
@@ -226,8 +241,11 @@ public class TService extends Service implements LocationListener{
 
     public void onLocationChanged(Location location) {
         // TODO Auto-generated method stub
+        tlocation = location;
+        lat = tlocation.getLatitude();
+        lon = tlocation.getLongitude();
 
-        try{
+        try {
             tMapView.removeMarkerItem("currentPoint"); // 기존 마커를 제거한다.
             TMapPoint currentPoint = new TMapPoint(location.getLatitude(), location.getLongitude());
             TMapMarkerItem currentMarker = new TMapMarkerItem();
@@ -250,6 +268,7 @@ public class TService extends Service implements LocationListener{
                     if (mIndex < messageList.size() && pIndex < pointList.size()) {
 //                    mIndex++;
                         textView.setText(messageList.get(mIndex));
+                        changeArrow(arrow_img, textView);
                         TTS tts = new TTS(mContext, messageList.get(mIndex));
                     } else {
                         textView.setText("도착하였습니다.");
@@ -304,7 +323,6 @@ public class TService extends Service implements LocationListener{
                     }
                 }
             }
-
 //        textView.setText("Count: " + Integer.toString(count));
 //        count++;
 //
@@ -316,8 +334,26 @@ public class TService extends Service implements LocationListener{
 
 //        Toast.makeText(mContext, "currentPoint: " + Double.toString(location.getLatitude()) + ", " + Double.toString(location.getLongitude()) + "\n" + "provider: " + location.getProvider(), Toast.LENGTH_SHORT).show();
 //        Log.d("currentpoint: ", Double.toString(getLatitude()) + ", " + Double.toString(getLongitude()));
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
 //            Toast.makeText(mContext, "GPS를 인식할 수 없습니다. 건물 밑에서 나와 주세요.", Toast.LENGTH_SHORT).show();
+        }
+
+        Log.i("pointList",String.format("%b",pointList==null));
+
+        if (pointList != null){
+            dest_degree = destiny_angle(pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude());
+            Log.i("degree",String.format("%f",dest_degree));
+            Log.i("sight",String.format("%f",sight_degree));
+            if (sight_degree >= 20 && sight_degree <= 40) {
+                building_text.setText("건물있당!");
+                building_text.setX((float) (width - width * (sight_degree - 20) / 20));
+            } else if (sight_degree >= dest_degree - 10 && sight_degree <= dest_degree + 10) {
+                destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                destination_img.setX((float) (width - width * (sight_degree - (dest_degree - 10)) / 20));
+            } else {
+                building_text.setText("");
+                destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
+            }
         }
     }
 
@@ -388,5 +424,69 @@ public class TService extends Service implements LocationListener{
     // This function converts radians to decimal degrees
     private static double rad2deg(double rad) {
         return (rad * 180 / Math.PI);
+    }
+    // 여기부터 카메라 액티비티에서 쓰는 거
+    public static void setFlag(boolean flag){
+        activity_flag = flag;
+    }
+
+    public static void setArrowImg(ImageView img){
+        arrow_img = img;
+    }
+
+    void changeArrow(ImageView arrowView, TextView text_msg){
+        String msg = (String) text_msg.getText();
+
+        if(msg.indexOf("왼쪽")>=0){
+            arrowView.setImageResource(R.drawable.back);
+        }
+        else if(msg.indexOf("오른쪽")>=0){
+            arrowView.setImageResource(R.drawable.next);
+        }
+        else{
+            arrowView.setImageResource(R.drawable.uparrow);
+        }
+    }
+
+    //목적지 팔로잉 각도
+    public double destiny_angle(double dest_latitude, double dest_longitude){
+        double my_latitude = lat;
+        double my_longitude = lon; // gps info 에서 가져옴
+        double standard_latitude, standard_longitude; // 가로, 세로
+
+        standard_latitude = my_latitude;
+        standard_longitude = dest_longitude;
+
+        double vector_Latitude = dest_latitude - my_latitude;
+        double vector_Longitude = dest_longitude - my_longitude;
+
+        double vector_standard_latitude = standard_latitude - my_latitude;
+        double vector_standard_longitude = standard_longitude - my_longitude;
+
+        double angle = (Math.asin((vector_Longitude * vector_standard_latitude - vector_Latitude * vector_standard_longitude)
+                /(Math.sqrt(Math.pow(vector_Latitude, 2) + Math.pow(vector_Longitude, 2)) * Math.sqrt(Math.pow(vector_standard_latitude, 2) + Math.pow(vector_standard_longitude, 2)))) * 57.2958);
+
+        // 특정 각도가 넘는지를 확인한다.
+        return Math.abs(angle);
+    }
+
+    public double getDest_degree(){
+        return dest_degree;
+    }
+
+    public void setSight_degree(double pitch){
+        sight_degree = pitch;
+    }
+
+    public void setBuilding_text(TextView tmp){
+        building_text = tmp;
+    }
+
+    public void setDestination_img(ImageView img){
+        destination_img = img;
+    }
+
+    public void setWidth(int temp){
+        width = temp;
     }
 }

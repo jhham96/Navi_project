@@ -58,6 +58,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private Button mode_switch_btn;
     private ProgressBar percent_proBar;
 
+    private boolean isCreate;
+
     private ImageView arrow_img;
     private ImageView destination_img;
 
@@ -172,6 +174,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         Intent intent = new Intent(CameraActivity.this, TService.class);
         bindService(intent, conn, Context.BIND_AUTO_CREATE);
 
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        width = metrics.widthPixels;
+        building_text = (TextView)findViewById(R.id.building_text);
+
         // 생성 시, Dialog 나타나게 설정한다.
         AlertDialog.Builder builder = new AlertDialog.Builder(CameraActivity.this);
         builder.setTitle("카메라 모드를 시작하겠습니다.");
@@ -179,22 +186,20 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         builder.setPositiveButton("예",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        isCreate = true;
                         tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
                         tService.setProgressbar(percent_proBar);
                         textView.setText(tService.getMessage());
+                        tService.setFlag(false);
+                        tService.setArrowImg(arrow_img);
+                        tService.setBuilding_text(building_text);
+                        tService.setDestination_img(destination_img);
+                        tService.setWidth(width);
                     }
                 });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
 
-        // textview 메세지에 따라 화살표 변경 추후에 메세지 변경하는 함수에 넣어서 호출
-        changeArrow(arrow_img,textView);
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        width = metrics.widthPixels;
-        building_text = (TextView)findViewById(R.id.building_text);
         first_x = (TextView)findViewById(R.id.first_x);
         pitch_text = (TextView)findViewById(R.id.pitch);
 
@@ -242,9 +247,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         if(!gyroRunning){
                             gyroRunning=true;
                         }
-                        double gyroX = sensorEvent.values[0];
                         double gyroY = sensorEvent.values[1];
-                        double gyroZ = sensorEvent.values[2];
                         double text = 0.0;
 
                         /* 단위시간 계산 */
@@ -254,10 +257,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         /* 시간이 변화했으면 */
                         if (dt - timestamp * NS2S != 0) {
                             pitch = pitch + gyroY * dt;
-                            /*
-                            roll = roll + gyroX * dt;
-                            yaw = yaw + gyroZ * dt;
-                            */
+
                             if(pitch > 0){
                                 text = -(360 + pitch * rad_to_dgr)%360;
                             }
@@ -267,19 +267,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             first_x.setText(String.format("%f",firstMagn));
                             handling_x = (text+firstMagn)%360; // handling_x = 핸드폰 들고 나침반 각도
                             pitch_text.setText(String.format("%f",handling_x));
-                            if(handling_x>=20 && handling_x<=40) {
-                                building_text.setText("건물있당!");
-                                building_text.setX((float)(width-width*(handling_x-20)/20));
-                            }
-                            else if(handling_x >= 180 && handling_x <=200){
-                                destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
-                                destination_img.setX((float)(width-width*(handling_x-180)/20));
-                            }
-                            else{
-                                building_text.setText("");
-                            //    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
-                            }
-
+                            if(isCreate)
+                                tService.setSight_degree(handling_x);
                         }
                     }
                 }
@@ -292,32 +281,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
             }
         };
-    }
-
-    //목적지 팔로잉 각도
-    public double destiny_angle(double latitude, double longitude){
-        double my_latitude = 0.0;
-        double my_longitude = 0.0; // gps info 에서 가져옴
-        double standard_latitude, standard_longitude; // 가로, 세로
-
-        standard_latitude = my_latitude;
-        standard_longitude = longitude;
-
-        double vector_Latitude = latitude - my_latitude;
-        double vector_Longitude = longitude - my_longitude;
-
-        double vector_standard_latitude = standard_latitude - my_latitude;
-        double vector_standard_longitude = standard_longitude - my_longitude;
-
-        // 각도가 얼마나 변했는지를 표현한다.
-//                        Log.d("angle", Double.toString(Math.asin((vector1_Longitude * vector2_Latitude - vector1_Latitude * vector2_Longitude)
-//                                /(Math.sqrt(Math.pow(vector1_Latitude, 2) + Math.pow(vector1_Longitude, 2)) * Math.sqrt(Math.pow(vector2_Latitude, 2) + Math.pow(vector2_Longitude, 2)))) * 57.2958));
-
-        double angle = (Math.asin((vector_Longitude * vector_standard_latitude - vector_Latitude * vector_standard_longitude)
-                /(Math.sqrt(Math.pow(vector_Latitude, 2) + Math.pow(vector_Longitude, 2)) * Math.sqrt(Math.pow(vector_standard_latitude, 2) + Math.pow(vector_standard_longitude, 2)))) * 57.2958);
-
-        // 특정 각도가 넘는지를 확인한다.
-        return Math.abs(angle);
     }
 
     private void complementary(double new_ts){
@@ -344,19 +307,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
          */
         temp = (1/a) * (mAccPitch - pitch) + mGyroValues[1];
         pitch = pitch + (temp*dt);
-    }
-    void changeArrow(ImageView arrowView, TextView text_msg){
-        String msg = (String) text_msg.getText();
-
-        if(msg.indexOf("왼쪽")>=0){
-            arrowView.setImageResource(R.drawable.back);
-        }
-        else if(msg.indexOf("오른쪽")>=0){
-            arrowView.setImageResource(R.drawable.next);
-        }
-        else{
-            arrowView.setImageResource(R.drawable.uparrow);
-        }
     }
 
     protected void onResume() {

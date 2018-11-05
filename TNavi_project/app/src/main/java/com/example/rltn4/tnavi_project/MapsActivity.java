@@ -471,6 +471,12 @@ public class MapsActivity extends AppCompatActivity {
         }
     }
 
+    protected void onResume() {
+        super.onResume();
+        if(isCreate){
+            tService.setFlag(true);
+        }
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
