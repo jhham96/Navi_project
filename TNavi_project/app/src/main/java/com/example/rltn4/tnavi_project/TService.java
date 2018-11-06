@@ -415,11 +415,23 @@ public class TService extends Service implements LocationListener{
     void changeArrow(ImageView arrowView, TextView text_msg){
         String msg = (String) text_msg.getText();
 
-        if(msg.indexOf("왼쪽")>=0){
-            arrowView.setImageResource(R.drawable.back);
+        if(msg.indexOf("1")>=0){
+            arrowView.setImageResource(R.drawable.t1);
         }
-        else if(msg.indexOf("오른쪽")>=0){
-            arrowView.setImageResource(R.drawable.next);
+        else if(msg.indexOf("3")>=0){
+            arrowView.setImageResource(R.drawable.t3);
+        }
+        else if(msg.indexOf("5")>=0){
+            arrowView.setImageResource(R.drawable.t5);
+        }
+        else if(msg.indexOf("7")>=0){
+            arrowView.setImageResource(R.drawable.t7);
+        }
+        else if(msg.indexOf("9")>=0){
+            arrowView.setImageResource(R.drawable.t9);
+        }
+        else if(msg.indexOf("11")>=0){
+            arrowView.setImageResource(R.drawable.t11);
         }
         else{
             arrowView.setImageResource(R.drawable.uparrow);
