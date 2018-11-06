@@ -67,6 +67,7 @@ public class MapsActivity extends AppCompatActivity {
             tService = mb.getService(); // 서비스가 제공하는 메소드 호출하여
             // 서비스쪽 객체를 전달받을수 있슴
             isService = true;
+
         }
 
         public void onServiceDisconnected(ComponentName name) {

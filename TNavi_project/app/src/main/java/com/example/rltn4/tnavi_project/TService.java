@@ -73,14 +73,6 @@ public class TService extends Service implements LocationListener{
 
     protected static LocationManager locationManager;
 
-    // 목적지 팔로잉 각도
-    private static double dest_degree = 0.0;
-    private static double sight_degree = 0.0;
-
-    private static TextView building_text;
-    private static ImageView destination_img;
-    private static int width;
-
     class LocalBinder extends Binder {
         TService getService() {
             return TService.this;
@@ -268,7 +260,8 @@ public class TService extends Service implements LocationListener{
                     if (mIndex < messageList.size() && pIndex < pointList.size()) {
 //                    mIndex++;
                         textView.setText(messageList.get(mIndex));
-                        changeArrow(arrow_img, textView);
+                        if(activity_flag == false)
+                            changeArrow(arrow_img, textView);
                         TTS tts = new TTS(mContext, messageList.get(mIndex));
                     } else {
                         textView.setText("도착하였습니다.");
@@ -303,6 +296,8 @@ public class TService extends Service implements LocationListener{
                         mIndex++;
                         pIndex++;
                         textView.setText(messageList.get(mIndex));
+                        if(activity_flag == false)
+                            changeArrow(arrow_img,textView);
                     } else {
                         textView.setText("도착하였습니다.");
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -338,23 +333,6 @@ public class TService extends Service implements LocationListener{
 //            Toast.makeText(mContext, "GPS를 인식할 수 없습니다. 건물 밑에서 나와 주세요.", Toast.LENGTH_SHORT).show();
         }
 
-        Log.i("debug2",String.format("pointList = %b",pointList==null));
-        Log.i("debug2",String.format("sight_degree = %f",sight_degree));
-        if (pointList != null){
-            dest_degree = destiny_angle(pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude());
-            Log.i("debug2",String.format("dest_degree = %f",dest_degree));
-            Log.i("debug2",String.format("sight_degree = %f",sight_degree));
-            if (sight_degree >= 20 && sight_degree <= 40) {
-                building_text.setText("건물있당!");
-                building_text.setX((float) (width - width * (sight_degree - 20) / 20));
-            } else if (sight_degree >= dest_degree - 10 && sight_degree <= dest_degree + 10) {
-                destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
-                destination_img.setX((float) (width - width * (sight_degree - (dest_degree - 10)) / 20));
-            } else {
-                building_text.setText("");
-                destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
-            }
-        }
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -448,45 +426,7 @@ public class TService extends Service implements LocationListener{
         }
     }
 
-    //목적지 팔로잉 각도
-    public double destiny_angle(double dest_latitude, double dest_longitude){
-        double my_latitude = lat;
-        double my_longitude = lon; // gps info 에서 가져옴
-        double standard_latitude, standard_longitude; // 가로, 세로
-
-        standard_latitude = my_latitude;
-        standard_longitude = dest_longitude;
-
-        double vector_Latitude = dest_latitude - my_latitude;
-        double vector_Longitude = dest_longitude - my_longitude;
-
-        double vector_standard_latitude = standard_latitude - my_latitude;
-        double vector_standard_longitude = standard_longitude - my_longitude;
-
-        double angle = (Math.asin((vector_Longitude * vector_standard_latitude - vector_Latitude * vector_standard_longitude)
-                /(Math.sqrt(Math.pow(vector_Latitude, 2) + Math.pow(vector_Longitude, 2)) * Math.sqrt(Math.pow(vector_standard_latitude, 2) + Math.pow(vector_standard_longitude, 2)))) * 57.2958);
-
-        // 특정 각도가 넘는지를 확인한다.
-        return Math.abs(angle);
-    }
-
-    public double getDest_degree(){
-        return dest_degree;
-    }
-
-    public void setSight_degree(double pitch){
-        sight_degree = pitch;
-    }
-
-    public void setBuilding_text(TextView tmp){
-        building_text = tmp;
-    }
-
-    public void setDestination_img(ImageView img){
-        destination_img = img;
-    }
-
-    public void setWidth(int temp){
-        width = temp;
+    public static ArrayList<TMapPoint> getPointList(){
+        return pointList;
     }
 }
