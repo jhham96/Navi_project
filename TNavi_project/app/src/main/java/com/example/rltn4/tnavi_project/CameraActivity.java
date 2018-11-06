@@ -31,6 +31,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.ImageView;
@@ -134,6 +135,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_camera);
         if (APIVersion >= android.os.Build.VERSION_CODES.M){
             if(checkCAMERAPermission()){
@@ -272,7 +274,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                             ArrayList<TMapPoint> pointList = tService.getPointList();
                             if(isCreate) {
-                           //     dest_degree = destiny_angle(tService.getPointList().get(tService.getPointList().size() - 1).getLatitude(), tService.getPointList().get(pointList.size() - 1).getLongitude());
+                                dest_degree = destiny_angle(tService.getPointList().get(tService.getPointList().size() - 1).getLatitude(), tService.getPointList().get(pointList.size() - 1).getLongitude());
                                 /* 건물정보 출력 */
                                 if (handling_x >= 20 && handling_x <= 40) {
                                     building_text.setText("건물있당!");
@@ -283,7 +285,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                                 }
                                 /* 목적지 팔로잉 */
-                                dest_degree = 355.0;
                                 if (dest_degree >= 10 && dest_degree < 350 && handling_x >= (dest_degree - 10.0) && handling_x <= (dest_degree + 10.0)) { // 목적지가 10~350
                                     destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
                                     destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0));
