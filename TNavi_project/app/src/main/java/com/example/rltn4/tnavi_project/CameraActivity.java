@@ -101,9 +101,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private double temp;
     private float a = 0.2f;
 
-    private GpsInfo gps;
+    private double dest_degree = 0.0;
 
-    private Location tlocation; // gps를 아직 못가져와서 넣어놈
+    private float mLowPassY = 0;
+    private float mHighPassY = 0;
+    private float mLastY = 0;
 
     private TService tService; // 서비스 변수이다.
     private boolean isService = false; // 서비스 중인지 확인하는 변수이다.
@@ -133,7 +135,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
-        gps = (GpsInfo)getIntent().getSerializableExtra("gpsinfo");
         if (APIVersion >= android.os.Build.VERSION_CODES.M){
             if(checkCAMERAPermission()){
                 mcamera = android.hardware.Camera.open();
@@ -190,11 +191,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
                         tService.setProgressbar(percent_proBar);
                         textView.setText(tService.getMessage());
-                        tService.setFlag(false);
                         tService.setArrowImg(arrow_img);
-                        tService.setBuilding_text(building_text);
-                        tService.setDestination_img(destination_img);
-                        tService.setWidth(width);
                     }
                 });
         AlertDialog alertDialog = builder.create();
@@ -221,17 +218,17 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             if(!accRunning){
                                 accRunning=true;
                             }
-                            mGravity[0] = alpha * mGravity[0] + (1 - alpha) * sensorEvent.values[0];
-                            mGravity[1] = alpha * mGravity[1] + (1 - alpha) * sensorEvent.values[1];
-                            mGravity[2] = alpha * mGravity[2] + (1 - alpha) * sensorEvent.values[2];
+                            mGravity[0] = sensorEvent.values[0];
+                            mGravity[1] = sensorEvent.values[1];
+                            mGravity[2] = sensorEvent.values[2];
                         }
                         if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                            mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha) * sensorEvent.values[0];
-                            mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha) * sensorEvent.values[1];
-                            mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha) * sensorEvent.values[2];
+                            mGeomagnetic[0] = sensorEvent.values[0];
+                            mGeomagnetic[1] = sensorEvent.values[1];
+                            mGeomagnetic[2] = sensorEvent.values[2];
                         }
 
-                        boolean success = SensorManager.getRotationMatrix(Rotation, I, mGravity, mGeomagnetic);
+                        boolean success = SensorManager.getRotationMatrix(Rotation, null, mGravity, mGeomagnetic);
 
                         if (success) {
                             float orientaion[] = new float[3];
@@ -250,6 +247,11 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         double gyroY = sensorEvent.values[1];
                         double text = 0.0;
 
+                        mLowPassY = lowPass((float)gyroY,mLowPassY);
+                        /* 하이패스 필터*/
+                        mHighPassY = highPass(mLowPassY,mLastY,mHighPassY);
+                        mLastY = mLowPassY;
+
                         /* 단위시간 계산 */
                         dt = (sensorEvent.timestamp - timestamp) * NS2S;
                         timestamp = sensorEvent.timestamp;
@@ -257,28 +259,41 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         /* 시간이 변화했으면 */
                         if (dt - timestamp * NS2S != 0) {
                             pitch = pitch + gyroY * dt;
+                            text = -(pitch * rad_to_dgr) % 360; // 자이로는 반시계로 돌릴 때 값이 양수로 증가, 시계는 음수로 증가, 나침반이라 반대라서 부호 바꿔줌
 
-                            if(pitch > 0){
-                                text = -(360 + pitch * rad_to_dgr)%360;
-                            }
-                            else {
-                                text = -(pitch * rad_to_dgr) % 360;
-                            }
                             first_x.setText(String.format("%f",firstMagn));
-                            handling_x = (text+firstMagn)%360; // handling_x = 핸드폰 들고 나침반 각도
+                            handling_x = text+firstMagn;
+                            if(handling_x < 0){
+                                handling_x = 360 + handling_x;
+                            }
+                            handling_x = handling_x%360; // handling_x = 핸드폰 들고 나침반 각도
                             pitch_text.setText(String.format("%f",handling_x));
-<<<<<<< HEAD
-                            if(handling_x>=20 && handling_x<=40) {
-                                building_text.setText("건물있당!");
-                                building_text.setX((float)(width-width*(handling_x-20)/20));
+
+                            ArrayList<TMapPoint> pointList = tService.getPointList();
+                            if(isCreate) {
+                                dest_degree = destiny_angle(tService.getPointList().get(tService.getPointList().size() - 1).getLatitude(), tService.getPointList().get(pointList.size() - 1).getLongitude());
+                                Log.d("degree","dest_degree2 : "+String.format("%f",dest_degree));
+
+                                if (handling_x >= 20 && handling_x <= 40) {
+                                    building_text.setText("건물있당!");
+                                    building_text.setX((float) (width - width * (handling_x - 20) / 20));
+                                } else if (dest_degree >= 10.0 && dest_degree <350.0 && handling_x >= (dest_degree - 10.0) && handling_x <= (dest_degree + 10.0)) {
+                                    Log.d("degree","dest_degree : "+String.format("%f",dest_degree));
+                                    Log.d("degree","handling_x : "+String.format("%f",handling_x));
+                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                    destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0));
+                                } else if (dest_degree < 10.0 && handling_x < (dest_degree +10.0) && handling_x > ( 360 - dest_degree)){
+                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                    destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0)); // 예외처리 필요
+                                } else if(dest_degree >= 350.0 && handling_x >= (dest_degree - 10.0) && handling_x < ( 10.0+ dest_degree)%360){
+                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                    destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0)); // 예외처리 필요
+                                }
+                                else {
+                                    building_text.setText("");
+                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
+                                }
                             }
-                            else{
-                                building_text.setText("");
-                            }
-=======
-                            if(isCreate)
-                                tService.setSight_degree(handling_x);
->>>>>>> tmp
                         }
                     }
                 }
@@ -293,6 +308,34 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         };
     }
 
+    public double destiny_angle(double dest_latitude, double dest_longitude){
+        double my_latitude = tService.getLatitude();
+        double my_longitude = tService.getLongitude(); // gps info 에서 가져옴
+        double standard_latitude, standard_longitude; // 가로, 세로
+
+        standard_latitude = my_latitude;
+        standard_longitude = dest_longitude;
+
+        double vector_Latitude = dest_latitude - my_latitude;
+        double vector_Longitude = dest_longitude - my_longitude;
+
+        double vector_standard_latitude = standard_latitude - my_latitude;
+        double vector_standard_longitude = standard_longitude - my_longitude;
+
+        double angle = (Math.asin((vector_Longitude * vector_standard_latitude - vector_Latitude * vector_standard_longitude)
+                /(Math.sqrt(Math.pow(vector_Latitude, 2) + Math.pow(vector_Longitude, 2)) * Math.sqrt(Math.pow(vector_standard_latitude, 2) + Math.pow(vector_standard_longitude, 2)))) * 57.2958);
+
+        // 특정 각도가 넘는지를 확인한다.
+        return Math.abs(angle);
+    }
+
+    float lowPass(float current, float last){
+        return (float)(last*(1.0f-0.1)+current*0.1);
+    }
+
+    float highPass(float current, float last, float filtered){
+        return (float)(0.1*(filtered+current-last));
+    }
     private void complementary(double new_ts){
         /* 자이로랑 가속 해제 */
         gyroRunning = false;
@@ -308,7 +351,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
         /* degree measure for accelerometer */
         mAccPitch = -Math.atan2(mGravity[0], mGravity[2]) * 180.0 / Math.PI; // Y 축 기준
-        mAccRoll= Math.atan2(mGravity[1], mGravity[2]) * 180.0 / Math.PI; // X 축 기준
 
         /**
          * 1st complementary filter.
@@ -321,6 +363,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     protected void onResume() {
         super.onResume();
+        if(isCreate)
+            tService.setFlag(false);
         mySensorManager.registerListener(magnetic_Listener, myMagnetic, SensorManager.SENSOR_DELAY_UI);
         mySensorManager.registerListener(magnetic_Listener, myAccele,SensorManager.SENSOR_DELAY_UI);
         mySensorManager.registerListener(magnetic_Listener, myGyroscope,SensorManager.SENSOR_DELAY_UI);
