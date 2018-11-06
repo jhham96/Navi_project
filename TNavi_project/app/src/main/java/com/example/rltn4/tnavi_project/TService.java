@@ -338,12 +338,12 @@ public class TService extends Service implements LocationListener{
 //            Toast.makeText(mContext, "GPS를 인식할 수 없습니다. 건물 밑에서 나와 주세요.", Toast.LENGTH_SHORT).show();
         }
 
-        Log.i("pointList",String.format("%b",pointList==null));
-
+        Log.i("debug2",String.format("pointList = %b",pointList==null));
+        Log.i("debug2",String.format("sight_degree = %f",sight_degree));
         if (pointList != null){
             dest_degree = destiny_angle(pointList.get(pointList.size() - 1).getLatitude(), pointList.get(pointList.size() - 1).getLongitude());
-            Log.i("degree",String.format("%f",dest_degree));
-            Log.i("sight",String.format("%f",sight_degree));
+            Log.i("debug2",String.format("dest_degree = %f",dest_degree));
+            Log.i("debug2",String.format("sight_degree = %f",sight_degree));
             if (sight_degree >= 20 && sight_degree <= 40) {
                 building_text.setText("건물있당!");
                 building_text.setX((float) (width - width * (sight_degree - 20) / 20));

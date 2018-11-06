@@ -267,18 +267,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             first_x.setText(String.format("%f",firstMagn));
                             handling_x = (text+firstMagn)%360; // handling_x = 핸드폰 들고 나침반 각도
                             pitch_text.setText(String.format("%f",handling_x));
-<<<<<<< HEAD
-                            if(handling_x>=20 && handling_x<=40) {
-                                building_text.setText("건물있당!");
-                                building_text.setX((float)(width-width*(handling_x-20)/20));
-                            }
-                            else{
-                                building_text.setText("");
-                            }
-=======
+
                             if(isCreate)
                                 tService.setSight_degree(handling_x);
->>>>>>> tmp
                         }
                     }
                 }
