@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="colorPrimary">#FFFFCC</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FFCCCC</color>
-    <color name="colorSky">#00a7f4</color>
-    <color name="colorTrans">#6edcd9d9</color>
-    <color name="colorTrans_t">#00dcd9d9</color>
-</resources>
