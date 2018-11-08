@@ -104,6 +104,7 @@ public class ShowRelatedResultActivity extends AppCompatActivity {
                     tMapPOIItemsList = tMapData.findAllPOI(textView.getText().toString());
 
                     // listview에 내용 삽입
+
                     for(int i = 0; i < tMapPOIItemsList.size(); i++) {
                         adapter.addItem(tMapPOIItemsList.get(i));
                     }
@@ -121,6 +122,8 @@ public class ShowRelatedResultActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } catch (SAXException e) {
                     e.printStackTrace();
+                } catch (NullPointerException e) {
+
                 }
             }
         }.start();

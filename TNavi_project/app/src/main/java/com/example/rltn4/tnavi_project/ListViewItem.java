@@ -10,8 +10,8 @@ public class ListViewItem implements Serializable {
     private TMapBox tMapBoxFinish;
 
     public ListViewItem(ListViewItem item) {
-        this.tMapBoxStart= item.gettMapBoxStart();
-        this.tMapBoxFinish = item.gettMapBoxFinish();
+        this.tMapBoxStart = new TMapBox(item.gettMapBoxStart());
+        this.tMapBoxFinish = new TMapBox(item.gettMapBoxFinish());
     }
     public ListViewItem() {
 

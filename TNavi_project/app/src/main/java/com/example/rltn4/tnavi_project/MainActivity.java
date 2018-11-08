@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +13,9 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -25,6 +27,11 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity {
 
     final int MY_PERMISSION_REQUEST_CODE = 100;
+
+    // Write a message to the database
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference myRef = database.getReference("LocationData");
+
     // 검색결과 저장할 변수 선언
     private ListViewItem listViewItem;
 
@@ -40,22 +47,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        Log.i("intent333333",String.format("%s",((TMapBox)data.getSerializableExtra("data")).getName()));
         if(resultCode == 400) {
 
         } else {
-            if(data.getStringExtra("value").equals("1")) {
-                listViewItem.settMapBoxStart(((TMapBox)data.getSerializableExtra("data")));
+
+            try {
+                if(data.getStringExtra("value").equals("1")) {
+                    listViewItem.settMapBoxStart(((TMapBox)data.getSerializableExtra("data")));
 //            TMapPOIItem_child tMapPOIItem_child = (TMapPOIItem_child) getIntent().getSerializableExtra("data");
 //            listViewItem.settMapPOIItemsStart(tMapPOIItem_child.gettMapPOIItem());
-                // listViewItem.settMapPOIItemsStart(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
-                start.setText(listViewItem.gettMapBoxStart().getName());
-            }
-            else {
-                listViewItem.settMapBoxFinish(((TMapBox)data.getSerializableExtra("data")));
-                //            listViewItem.settMapPOIItemsFinish(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
-                //            finish.setText(listViewItem.gettMapPOIItemsFinish().getPOIName());
-                finish.setText(listViewItem.gettMapBoxFinish().getName());
+                    // listViewItem.settMapPOIItemsStart(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
+                    start.setText(listViewItem.gettMapBoxStart().getName());
+                }
+                else {
+                    listViewItem.settMapBoxFinish(((TMapBox)data.getSerializableExtra("data")));
+                    //            listViewItem.settMapPOIItemsFinish(((TMapPOIItem_child) getIntent().getParcelableExtra("data")).gettMapPOIItem());
+                    //            finish.setText(listViewItem.gettMapPOIItemsFinish().getPOIName());
+                    finish.setText(listViewItem.gettMapBoxFinish().getName());
+                }
+            } catch (NullPointerException e ) {
+
             }
         }
     }
@@ -121,15 +132,37 @@ public class MainActivity extends AppCompatActivity {
                  *  2. 넘어갈시 인덱스 20번째 해당하는 데이터 삭제
                  *  3. 새로운 데이터 추가
                  *   * 이로써 데이터는 20개가 계속 유지되게 된다.(인덱스 0 ~ 19 고정으로 유지된다.) */
+
                 if(adapter.getCount() > 19) {
                     adapter.deleteItem(19);    // 옛날 데이터 삭제
                 }
-                // 최신 데이터 삽입
-                adapter.addItem(listViewItem);
+
+                // item 변수를 사용해 간접적으로 사용함으로써 데이터 중복을 막는다...?
+                ListViewItem item = new ListViewItem(listViewItem);
+                adapter.addItem(item);      // 최신 데이터 삽입
                 adapter.notifyDataSetChanged();
 
+                // ## 파이어베이스에 데이터 저장(나중엔 주석처리 예정) ##
+                // 1. 저장할 데이터 변수선언
+                TMapBox start = item.gettMapBoxStart(),
+                        finish = item.gettMapBoxFinish();
+
+                // 2. 파이어베이스는 '[', ']'를 쓸수 없으므로 인코딩 처리
+                start.setName(EncodeString(start.getName()));
+                finish.setName(EncodeString(finish.getName()));
+
+                // 3. DB 삽입
+                myRef.child(start.getName()).setValue(start);
+                myRef.child(finish.getName()).setValue(finish);
+                // ########## ############# ########## ######### #########
+
+                // 4. 디코딩 (adapter에 추가된 녀석은 영향받지 않도록)
+                start.setName(DecodeString(start.getName()));
+                finish.setName(DecodeString(finish.getName()));
+
+
                 Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-                intent.putExtra("Location", (Serializable) listViewItem);
+                intent.putExtra("Location", (Serializable) item);
                 startActivity(intent);
             }
         });
@@ -172,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
     private void initHistory() {
         SharedPreferences sp = getSharedPreferences("main_activity_his", MODE_PRIVATE); // main_activity_his라는 preference를 참조
         ArrayList<String> preference_keys = new ArrayList<>();
@@ -230,13 +264,18 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sp = getSharedPreferences("main_activity_his", MODE_PRIVATE); // main_activity_his라는 preference를 참조
         SharedPreferences.Editor editor = sp.edit();
         editor.clear();         // DB data 초기화
+        editor.commit();
+
 
         // DB에 새로운 값추가
 //        gson = new GsonBuilder().create();
-
-        for(Integer i = adapter.getCount() - 1 ; i >= 0  ; i--) {
+        // 다시 집어넣기 위해서 에디터 설정
+        editor = sp.edit();
+        for(Integer i = adapter.getCount() - 1, j = 0 ; i >= 0  ; i--, j++) {
             ListViewItem data = new ListViewItem(adapter.getItem(i));
-            editor.putString(i.toString(), gson.toJson(data, ListViewItem.class));  // 객체->Json으로 변환한 값 추가
+            editor.putString(i.toString(j), gson.toJson(data, ListViewItem.class));  // 객체->Json으로 변환한 값 추가
+
+            // 에디터에 추가되는 순서대로 쌓이는 줄 알앗는데, key값에 의해 정렬되나 보다...
         }
         editor.commit();
     }
@@ -245,6 +284,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // 새로운 리스트뷰 아이템을 생성해 이전에 생성한 아이템 내용을 바꾸지 않게 한다.
 
         // 검색결과 엑티비티를 종료하면 다시 MainActivity로 되돌아 올때 이 메소드를 거친다.
         // 검색결과 Item을 받고 데이터로 초기화 해준다.
@@ -267,5 +308,18 @@ public class MainActivity extends AppCompatActivity {
 //            finish.setText(listViewItem.gettMapPOIItemsFinish().getPOIName());
             finish.setText(listViewItem.gettMapBoxFinish().getName());
         }
+    }
+
+    // Firebase Database paths must not contain '.', '#', '$', '[', or ']'
+    // 그래서 아래와 같이 임의로 문자를 encoding/decoding 하는 방법을 사용한다.
+    public static String EncodeString(String string) {
+        string = string.replace("[", "{");
+        string = string.replace("]", "}");
+        return string;
+    }
+    public static String DecodeString(String string) {
+        string = string.replace("{", "[");
+        string = string.replace("}", "]");
+        return string;
     }
 }

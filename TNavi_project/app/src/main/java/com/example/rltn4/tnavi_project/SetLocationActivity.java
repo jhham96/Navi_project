@@ -53,18 +53,47 @@ public class SetLocationActivity extends AppCompatActivity {
         // MainActivity에서 받은 Intent정보를 받아 계속 전달한다.(메인 엑티비티로 되돌아갈시, 이게 출발데이터인지, 도착데이터인지 구분하기 위해)
         is_start_or_finish = getIntent().getStringExtra("value");
 
+        // listview 초기화 및 어뎁터 설정
+        listView = (ListView)findViewById(R.id.ListView);
+        adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, listitems);
+        listView.setAdapter(adapter);
+
+        initHistory();  // history 초기화
+
         // editText에 연결된 소프트키보드 검색버튼 액션리스너를 활성화 시켜준다.
         editText = (EditText)findViewById(R.id.edit);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    // adapter에 추가한다.
-                    adapter.insert(editText.getText(), 0);
 
                     if(adapter.getCount() > 19) {
                         adapter.remove(adapter.getItem(19));    // 20개가 넘어가면 맨 마지막에 있는 것들을 삭제하도록 한다.
                     }
+                    // adapter에 추가한다.
+                    adapter.insert(editText.getText().toString(), 0);
+                    adapter.notifyDataSetChanged();     // adapter 최신화
+
+                    // sharedPreferenced 최신화
+                    // 출발지인지, 도착지 검색인지 판단해 따로 검색기록을 저장해야 한다. 따라서 다른 preferenced를 사용하게 한다.
+                    String preferenced_name = null;
+                    if(is_start_or_finish.equals("1"))
+                        preferenced_name = "set_location_activity_his1";
+                    else if(is_start_or_finish.equals("2"))
+                        preferenced_name = "set_location_activity_his2";
+
+                    // SharedPreferenced에 등록
+                    //      1. DB 초기화
+                    //      2. 리스트뷰 내용 삽입
+                    //      3. 종료
+                    SharedPreferences sp = getSharedPreferences(preferenced_name, MODE_PRIVATE); // set_location_activity_his라는 preference를 참조
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.clear();         // DB data 초기화
+
+                    for(int i = 0 ; i < adapter.getCount()  ; i++) {
+                        editor.putString(String.format("%s", i), String.format("%s", adapter.getItem(i)));  // adapter -> sharedPreferenced에 저장
+                    }
+                    editor.commit();
 
                     // 다음 ShowRelatedResultActivity로 넘어간다.
                     Intent intent = new Intent(getApplicationContext(), ShowRelatedResultActivity.class);
@@ -77,13 +106,6 @@ public class SetLocationActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        // listview 초기화 및 어뎁터 설정
-        listView = (ListView)findViewById(R.id.ListView);
-        adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, listitems);
-        listView.setAdapter(adapter);
-
-        initHistory();  // history 초기화
 
 //        // -------------------- 수 정 --------------------
 //        // adapter에 추가한다.
@@ -122,6 +144,38 @@ public class SetLocationActivity extends AppCompatActivity {
 
                 // 검색창에 선택한 데이터 내용 삽입
                 editText.setText(str);
+
+                // adapter에 추가한다.
+                adapter.insert(editText.getText().toString(), 0);
+
+                if(adapter.getCount() > 19) {
+                    adapter.remove(adapter.getItem(19));    // 20개가 넘어가면 맨 마지막에 있는 것들을 삭제하도록 한다.
+                }
+
+                adapter.notifyDataSetChanged();     // adapter 최신화
+
+                // sharedPreferenced 최신화
+                // 출발지인지, 도착지 검색인지 판단해 따로 검색기록을 저장해야 한다. 따라서 다른 preferenced를 사용하게 한다.
+                String preferenced_name = null;
+                if(is_start_or_finish.equals("1"))
+                    preferenced_name = "set_location_activity_his1";
+                else if(is_start_or_finish.equals("2"))
+                    preferenced_name = "set_location_activity_his2";
+
+                // SharedPreferenced에 등록
+                //      1. DB 초기화
+                //      2. 리스트뷰 내용 삽입
+                //      3. 종료
+                SharedPreferences sp = getSharedPreferences(preferenced_name, MODE_PRIVATE); // set_location_activity_his라는 preference를 참조
+                SharedPreferences.Editor editor = sp.edit();
+                editor.clear();         // DB data 초기화
+
+                for(int i = 0 ; i < adapter.getCount()  ; i++) {
+                    editor.putString(String.format("%s", i), String.format("%s", adapter.getItem(i)));  // adapter -> sharedPreferenced에 저장
+                }
+                editor.commit();
+
+                // 다음 엑티비티 실행
                 Intent intent = new Intent(getApplicationContext(), ShowRelatedResultActivity.class);
                 intent.putExtra("location", editText.getText().toString());         // 다음 엑티비티로 넘어가기전, 결과값을 넘겨주기 위해 intent에 edit창의 내용을 저장한다.
                 intent.putExtra("value", is_start_or_finish);                         // MainActivity에서 받은 Intent정보를 받아 계속 전달한다.(메인 엑티비티로 되돌아갈시, 이게 출발데이터인지, 도착데이터인지 구분하기 위해)
@@ -161,36 +215,36 @@ public class SetLocationActivity extends AppCompatActivity {
         Iterator<?> it = col.iterator();
 
         while(it.hasNext()) {
-            adapter.insert((String)it.next(), 0);   // 앞쪽으로 데이터를 추가한다.
+            adapter.add((String)it.next());   // 데이터 추가 (앞쪽으로 밀어넣는게 안되서 그냥 순서대로로 수정.)
         }
         adapter.notifyDataSetChanged();     // adapter 최신화
 
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // 출발지인지, 도착지 검색인지 판단해 따로 검색기록을 저장해야 한다. 따라서 다른 preferenced를 사용하게 한다.
-        String preferenced_name = null;
-        if(is_start_or_finish.equals("1"))
-            preferenced_name = "set_location_activity_his1";
-        else if(is_start_or_finish.equals("2"))
-            preferenced_name = "set_location_activity_his2";
-
-        // SharedPreferenced에 등록
-        //      1. DB 초기화
-        //      2. 리스트뷰 내용 삽입
-        //      3. 종료
-        SharedPreferences sp = getSharedPreferences(preferenced_name, MODE_PRIVATE); // set_location_activity_his라는 preference를 참조
-        SharedPreferences.Editor editor = sp.edit();
-        editor.clear();         // DB data 초기화
-
-        for(int i = adapter.getCount() - 1 ; i >= 0  ; i--) {
-            editor.putString(String.format("%s", i), String.format("%s", adapter.getItem(i)));  // adapter -> sharedPreferenced에 저장
-        }
-        editor.commit();
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//
+//        // 출발지인지, 도착지 검색인지 판단해 따로 검색기록을 저장해야 한다. 따라서 다른 preferenced를 사용하게 한다.
+//        String preferenced_name = null;
+//        if(is_start_or_finish.equals("1"))
+//            preferenced_name = "set_location_activity_his1";
+//        else if(is_start_or_finish.equals("2"))
+//            preferenced_name = "set_location_activity_his2";
+//
+//        // SharedPreferenced에 등록
+//        //      1. DB 초기화
+//        //      2. 리스트뷰 내용 삽입
+//        //      3. 종료
+//        SharedPreferences sp = getSharedPreferences(preferenced_name, MODE_PRIVATE); // set_location_activity_his라는 preference를 참조
+//        SharedPreferences.Editor editor = sp.edit();
+//        editor.clear();         // DB data 초기화
+//
+//        for(int i = adapter.getCount() - 1 ; i >= 0  ; i--) {
+//            editor.putString(String.format("%s", i), String.format("%s", adapter.getItem(i)));  // adapter -> sharedPreferenced에 저장
+//        }
+//        editor.commit();
+//    }
 
 
 }
