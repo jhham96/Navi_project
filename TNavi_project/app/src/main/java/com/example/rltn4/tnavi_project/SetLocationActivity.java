@@ -67,13 +67,11 @@ public class SetLocationActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId == EditorInfo.IME_ACTION_SEARCH) {
 
-                    // adapter에 추가한다.
-                    adapter.insert(editText.getText().toString(), 0);
-
                     if(adapter.getCount() > 19) {
                         adapter.remove(adapter.getItem(19));    // 20개가 넘어가면 맨 마지막에 있는 것들을 삭제하도록 한다.
                     }
-
+                    // adapter에 추가한다.
+                    adapter.insert(editText.getText().toString(), 0);
                     adapter.notifyDataSetChanged();     // adapter 최신화
 
                     // sharedPreferenced 최신화
