@@ -21,6 +21,7 @@ import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +39,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapMarkerItem;
 import com.skt.Tmap.TMapPoint;
@@ -111,6 +117,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     private TService tService; // 서비스 변수이다.
     private boolean isService = false; // 서비스 중인지 확인하는 변수이다.
 
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference myRef = database.getReference("LocationData");
+    // 읽어온 데이터 저장할 리스트 변수 선언
+    private ArrayList<TMapBox> list = new ArrayList<>();
+
+
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name,
                                        IBinder service) {
@@ -173,6 +185,35 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
         final TextView textView = findViewById(R.id.text);
 
+        // 데이터 읽어오기
+        myRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                TMapBox tMapBox = dataSnapshot.getValue(TMapBox.class);
+                list.add(tMapBox);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         // 서비스와 연결한다.
         Intent intent = new Intent(CameraActivity.this, TService.class);
         bindService(intent, conn, Context.BIND_AUTO_CREATE);
@@ -213,6 +254,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
                 final float alpha = 0.97f;
+                int nearest_building_index = 0;
+                double building_degree = 0.0;
 
                 synchronized (this) {
                     if(isFirst<100) {
@@ -275,15 +318,39 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             ArrayList<TMapPoint> pointList = tService.getPointList();
                             if(isCreate) {
                                 dest_degree = destiny_angle(tService.getPointList().get(tService.getPointList().size() - 1).getLatitude(), tService.getPointList().get(pointList.size() - 1).getLongitude());
-                                /* 건물정보 출력 */
-                                if (handling_x >= 20 && handling_x <= 40) {
-                                    building_text.setText("건물있당!");
-                                    building_text.setX((float) (width - width * (handling_x - 20) / 20));
-                                }
-                                else{
-                                    building_text.setText("");
+                                nearest_building_index = nearest_building(tService.getPointList().get(tService.getPointList().size() - 1).getLatitude(), tService.getPointList().get(pointList.size() - 1).getLongitude());
+                                building_degree = destiny_angle(list.get(nearest_building_index).getLat(),list.get(nearest_building_index).getLon());
 
+                                /* 건물정보 출력 */
+                                if (building_degree >= 10 && building_degree < 350 && handling_x >= (building_degree - 10.0) && handling_x <= (building_degree + 10.0)) { // 목적지가 10~350
+                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                    destination_img.setX((float) (width - width * (handling_x - (building_degree - 10.0)) / 20.0));
                                 }
+                                else if (building_degree < 10.0 && (handling_x < (building_degree +10.0) || handling_x > ( 360 - building_degree))){ // 0~10
+                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                    if(handling_x < 350){
+                                        destination_img.setX((float) (width - (width * (handling_x - (building_degree - 10.0)) / 20.0))); // 예외처리 필요
+                                    }else{
+                                        destination_img.setX((float) (width - (width * (handling_x - (360-building_degree)) / 20.0))); // 예외처리 필요
+                                    }
+                                }
+                                else if(building_degree >= 350.0 && ((handling_x >= (building_degree - 10.0) || handling_x < (10.0+ building_degree)%360))){ // 350~360
+                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                    if(handling_x >= (building_degree - 10.0)){
+                                        destination_img.setX((float) (width - width * (handling_x - (building_degree - 10.0)) / 20.0)); // 예외처리 필요
+                                    }else{
+                                        destination_img.setX((float) (width * (((10.0 + building_degree)%360-handling_x)) / 20.0)); // 예외처리 필요
+                                    }
+                                }
+
+//                                if (handling_x >= 20 && handling_x <= 40) {
+//                                    building_text.setText("건물있당!");
+//                                    building_text.setX((float) (width - width * (handling_x - 20) / 20));
+//                                }
+//                                else{
+//                                    building_text.setText("");
+//
+//                                }
                                 /* 목적지 팔로잉 */
                                 if (dest_degree >= 10 && dest_degree < 350 && handling_x >= (dest_degree - 10.0) && handling_x <= (dest_degree + 10.0)) { // 목적지가 10~350
                                     destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
@@ -321,6 +388,22 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
             }
         };
+    }
+
+    public int nearest_building(double lat, double lon){
+        int index = 0;
+        double min_dist = -1;
+        double currnet_dist = 0;
+
+        for(int i=0; i<list.size(); i++) {
+            currnet_dist = distance(list.get(i).getLat(),list.get(i).getLon(),lat,lon,"meter");
+            if( min_dist > currnet_dist && min_dist != -1 ){
+                index = i;
+                min_dist = currnet_dist;
+            }
+        }
+
+        return index;
     }
 
     public double destiny_angle(double dest_latitude, double dest_longitude){
@@ -455,5 +538,39 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     private void showMessagePermission(String message, DialogInterface.OnClickListener okListener){
         new android.support.v7.app.AlertDialog.Builder(this).setMessage(message).setPositiveButton("허용",okListener).setNegativeButton("거부",null).create().show();
+    }
+
+    public static String DecodeString(String string) {
+        string = string.replace("{", "[");
+        string = string.replace("}", "]");
+        return string;
+    }
+
+    private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
+
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+
+        if (unit == "kilometer") {
+            dist = dist * 1.609344;
+        } else if(unit == "meter"){
+            dist = dist * 1609.344;
+        }
+
+        return (dist);
+    }
+
+    // This function converts decimal degrees to radians
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    // This function converts radians to decimal degrees
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
     }
 }
