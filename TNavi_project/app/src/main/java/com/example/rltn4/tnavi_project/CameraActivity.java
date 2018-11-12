@@ -123,6 +123,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     // 읽어온 데이터 저장할 리스트 변수 선언
     private ArrayList<TMapBox> list = new ArrayList<>();
 
+    public static Activity _Camera_Activity;
 
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name,
@@ -150,6 +151,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_camera);
+
+        _Camera_Activity = CameraActivity.this;
+
         if (APIVersion >= android.os.Build.VERSION_CODES.M){
             if(checkCAMERAPermission()){
                 mcamera = android.hardware.Camera.open();
