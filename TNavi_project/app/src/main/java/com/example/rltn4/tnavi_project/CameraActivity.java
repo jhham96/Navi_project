@@ -428,13 +428,13 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
         }
         else if( my_latitude < dest_latitude && my_longitude > dest_longitude){ // 2사분면
-            angle = 180 - angle;
+            angle = 270 + angle;
         }
         else if( my_latitude > dest_latitude && my_longitude > dest_longitude){ // 3사분면
-            angle = 180 + angle;
+            angle = 270 - angle;
         }
         else{ // 4사분면
-            angle = 360 - angle;
+            angle = 90 + angle;
         }
         // 특정 각도가 넘는지를 확인한다.
         return Math.abs(angle);
@@ -485,6 +485,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         mySensorManager.unregisterListener(magnetic_Listener);
     }
 
+    protected void onDestroy(){
+        super.onDestroy();
+        tService.setFlag(true);
+    }
     protected void onStop() {
         super.onStop();
     }

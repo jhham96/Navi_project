@@ -105,6 +105,7 @@ public class MapsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
+                tService.setFlag(false);
                 startActivity(intent);
 //                finish();
             }

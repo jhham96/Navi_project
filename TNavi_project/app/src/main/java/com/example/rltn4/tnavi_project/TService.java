@@ -15,7 +15,9 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
@@ -427,30 +429,29 @@ public class TService extends Service implements LocationListener{
         arrow_img = img;
     }
 
-    void changeArrow(ImageView arrowView, TextView text_msg){
+    void changeArrow(ImageView arrowView, TextView text_msg) {
         String msg = (String) text_msg.getText();
-
-        if(msg.indexOf("1")>=0){
+        if (msg.indexOf("1시") >= 0) {
             arrowView.setImageResource(R.drawable.t1);
-        }
-        else if(msg.indexOf("3")>=0){
+        } else if (msg.indexOf("3시") >= 0) {
             arrowView.setImageResource(R.drawable.t3);
-        }
-        else if(msg.indexOf("5")>=0){
+        } else if (msg.indexOf("5시") >= 0) {
             arrowView.setImageResource(R.drawable.t5);
-        }
-        else if(msg.indexOf("7")>=0){
+        } else if (msg.indexOf("7시") >= 0) {
             arrowView.setImageResource(R.drawable.t7);
-        }
-        else if(msg.indexOf("9")>=0){
+        } else if (msg.indexOf("9시") >= 0) {
             arrowView.setImageResource(R.drawable.t9);
-        }
-        else if(msg.indexOf("11")>=0){
+        } else if (msg.indexOf("11시") >= 0) {
             arrowView.setImageResource(R.drawable.t11);
-        }
-        else{
+        } else {
             arrowView.setImageResource(R.drawable.uparrow);
         }
+        Handler handler = new Handler(){
+            public void handleMessage(Message msg){
+                arrow_img.setImageResource(R.drawable.blank);
+            }
+        };
+        handler.sendEmptyMessageDelayed(0,3000); // 3초 딜레이
     }
 
     public static ArrayList<TMapPoint> getPointList(){
