@@ -54,6 +54,7 @@ import java.util.ArrayList;
 
 import static android.Manifest.permission_group.CAMERA;
 import static java.lang.StrictMath.abs;
+import static java.lang.StrictMath.min;
 
 public class CameraActivity extends AppCompatActivity implements SurfaceHolder.Callback{
 
@@ -319,44 +320,32 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             if(isCreate) {
                                 dest_degree = destiny_angle(tService.getPointList().get(tService.getPointList().size() - 1).getLatitude(), tService.getPointList().get(pointList.size() - 1).getLongitude());
                                 nearest_building_index = nearest_building();
-                                building_degree = destiny_angle(list.get(nearest_building_index).getLat(),list.get(nearest_building_index).getLon());
+                                if(nearest_building_index >= 0) {
+                                    building_degree = destiny_angle(list.get(nearest_building_index).getLat(), list.get(nearest_building_index).getLon());
 
-                                Log.d("degree","지금 내 위치 : "+String.format("%f",tService.getLatitude())+" "+String.format("%f",tService.getLongitude()));
-                                Log.d("degree","목적지 팔로잉 : "+String.format("%f",dest_degree));
-                                Log.d("degree","건물정보 출력 : "+String.format("%f",building_degree));
                                 /* 건물정보 출력 */
-                                if (building_degree >= 10 && building_degree < 350 && handling_x >= (building_degree - 10.0) && handling_x <= (building_degree + 10.0)) { // 목적지가 10~350
-                                    building_text.setText("건물있당!");
-                                    building_text.setX((float) (width - width * (handling_x - (building_degree - 10.0)) / 20.0));
-                                }
-                                else if (building_degree < 10.0 && (handling_x < (building_degree +10.0) || handling_x > ( 360 - building_degree))){ // 0~10
-                                    building_text.setText("건물있당!");
-                                    if(handling_x < 350){
-                                        building_text.setX((float) (width - (width * (handling_x - (building_degree - 10.0)) / 20.0))); // 예외처리 필요
-                                    }else{
-                                        building_text.setX((float) (width - (width * (handling_x - (360-building_degree)) / 20.0))); // 예외처리 필요
+                                    if (building_degree >= 10 && building_degree < 350 && handling_x >= (building_degree - 10.0) && handling_x <= (building_degree + 10.0)) { // 목적지가 10~350
+                                        building_text.setText(list.get(nearest_building_index).getName());
+                                        building_text.setX((float) (width - width * (handling_x - (building_degree - 10.0)) / 20.0));
+                                    } else if (building_degree < 10.0 && (handling_x < (building_degree + 10.0) || handling_x > (360 - building_degree))) { // 0~10
+                                        building_text.setText(list.get(nearest_building_index).getName());
+                                        if (handling_x < 350) {
+                                            building_text.setX((float) (width - (width * (handling_x - (building_degree - 10.0)) / 20.0)));
+                                        } else {
+                                            building_text.setX((float) (width - (width * (handling_x - (360 - building_degree)) / 20.0)));
+                                        }
+                                    } else if (building_degree >= 350.0 && ((handling_x >= (building_degree - 10.0) || handling_x < (10.0 + building_degree) % 360))) { // 350~360
+                                        building_text.setText(list.get(nearest_building_index).getName());
+                                        if (handling_x >= (building_degree - 10.0)) {
+                                            building_text.setX((float) (width - width * (handling_x - (building_degree - 10.0)) / 20.0));
+                                        } else {
+                                            building_text.setX((float) (width * (((10.0 + building_degree) % 360 - handling_x)) / 20.0));
+                                        }
+                                    } else {
+                                        building_text.setText("");
                                     }
-                                }
-                                else if(building_degree >= 350.0 && ((handling_x >= (building_degree - 10.0) || handling_x < (10.0+ building_degree)%360))){ // 350~360
-                                    building_text.setText("건물있당!");
-                                    if(handling_x >= (building_degree - 10.0)){
-                                        building_text.setX((float) (width - width * (handling_x - (building_degree - 10.0)) / 20.0)); // 예외처리 필요
-                                    }else{
-                                        building_text.setX((float) (width * (((10.0 + building_degree)%360-handling_x)) / 20.0)); // 예외처리 필요
-                                    }
-                                }
-                                else {
-                                    building_text.setText("");
                                 }
 
-//                                if (handling_x >= 20 && handling_x <= 40) {
-//                                    building_text.setText("건물있당!");
-//                                    building_text.setX((float) (width - width * (handling_x - 20) / 20));
-//                                }
-//                                else{
-//                                    building_text.setText("");
-//
-//                                }
                                 /* 목적지 팔로잉 */
                                 if (dest_degree >= 10 && dest_degree < 350 && handling_x >= (dest_degree - 10.0) && handling_x <= (dest_degree + 10.0)) { // 목적지가 10~350
                                     destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
@@ -365,17 +354,17 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                                 else if (dest_degree < 10.0 && (handling_x < (dest_degree +10.0) || handling_x > ( 360 - dest_degree))){ // 0~10
                                     destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
                                     if(handling_x < 350){
-                                        destination_img.setX((float) (width - (width * (handling_x - (dest_degree - 10.0)) / 20.0))); // 예외처리 필요
+                                        destination_img.setX((float) (width - (width * (handling_x - (dest_degree - 10.0)) / 20.0)));
                                     }else{
-                                        destination_img.setX((float) (width - (width * (handling_x - (360-dest_degree)) / 20.0))); // 예외처리 필요
+                                        destination_img.setX((float) (width - (width * (handling_x - (360-dest_degree)) / 20.0)));
                                     }
                                 }
                                 else if(dest_degree >= 350.0 && ((handling_x >= (dest_degree - 10.0) || handling_x < (10.0+ dest_degree)%360))){ // 350~360
                                     destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
                                     if(handling_x >= (dest_degree - 10.0)){
-                                        destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0)); // 예외처리 필요
+                                        destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0));
                                     }else{
-                                        destination_img.setX((float) (width * (((10.0 + dest_degree)%360-handling_x)) / 20.0)); // 예외처리 필요
+                                        destination_img.setX((float) (width * (((10.0 + dest_degree)%360-handling_x)) / 20.0));
                                     }
                                 }
                                 else {
@@ -398,24 +387,29 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     public int nearest_building(){
         int index = 0;
-        double min_dist = -1;
+        double min_dist = 100000;
         double currnet_dist = 0;
 
         for(int i=0; i<list.size(); i++) {
             currnet_dist = distance(list.get(i).getLat(),list.get(i).getLon(),tService.getLatitude(),tService.getLongitude(),"meter");
-            if( min_dist > currnet_dist && min_dist != -1 ){
+            Log.d("degree","min_dist : "+String.format("%s %f",list.get(index).getName(),min_dist));
+            Log.d("degree","current_dist : "+String.format("%s %f",list.get(i).getName(),currnet_dist));
+            if( min_dist > currnet_dist ){
                 index = i;
                 min_dist = currnet_dist;
             }
         }
-        Log.d("degree","가장 가까운 건물 : "+String.format("%s",list.get(index).getName()));
+//        if(min_dist > 7){
+//            index = -1;
+//        }
+
         return index;
     }
 
     public double destiny_angle(double dest_latitude, double dest_longitude){
         double my_latitude = tService.getLatitude();
         double my_longitude = tService.getLongitude(); // gps info 에서 가져옴
-        double standard_latitude, standard_longitude; // 가로, 세로
+        double standard_latitude, standard_longitude; // 가로선, 세로선
 
         standard_latitude = my_latitude;
         standard_longitude = dest_longitude;
@@ -429,6 +423,18 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         double angle = (Math.asin((vector_Longitude * vector_standard_latitude - vector_Latitude * vector_standard_longitude)
                 /(Math.sqrt(Math.pow(vector_Latitude, 2) + Math.pow(vector_Longitude, 2)) * Math.sqrt(Math.pow(vector_standard_latitude, 2) + Math.pow(vector_standard_longitude, 2)))) * 57.2958);
 
+        if( my_latitude < dest_latitude && my_longitude < dest_longitude ){ // 1사분면
+
+        }
+        else if( my_latitude < dest_latitude && my_longitude > dest_longitude){ // 2사분면
+            angle = 180 - angle;
+        }
+        else if( my_latitude > dest_latitude && my_longitude > dest_longitude){ // 3사분면
+            angle = 180 + angle;
+        }
+        else{ // 4사분면
+            angle = 360 - angle;
+        }
         // 특정 각도가 넘는지를 확인한다.
         return Math.abs(angle);
     }
