@@ -60,6 +60,8 @@ public class MapsActivity extends AppCompatActivity {
 
     private boolean compassMode = false; // compassMode를 위한 변수이다.
 
+    public static Activity _Maps_Activity;
+
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name,
                                        IBinder service) {
@@ -86,6 +88,9 @@ public class MapsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         FrameLayout frameLayoutTmap = (FrameLayout)findViewById(R.id.frameLayoutTmap);
+
+        _Maps_Activity = MapsActivity.this;
+
         tMapView = new TMapView(this);
 
         tMapView.setSKTMapApiKey("f51c315c-f7e2-42f9-b290-0d2f818c07d7");

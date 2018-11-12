@@ -75,6 +75,8 @@ public class TService extends Service implements LocationListener{
 
     protected static LocationManager locationManager;
 
+    private static AlertDialog.Builder builder;
+
     class LocalBinder extends Binder {
         TService getService() {
             return TService.this;
@@ -269,22 +271,9 @@ public class TService extends Service implements LocationListener{
                         textView.setText("도착하였습니다.");
                         TTS tts = new TTS(mContext, "도착하였습니다");
 
-                        // 도착 시, Dialog 나타나게 설정한다.
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        builder.setTitle("도착하였습니다.");
-                        builder.setMessage("화면 종료하시겠습니까?");
-                        builder.setPositiveButton("예",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        ((Activity) mContext).finish();
-                                    }
-                                });
-                        builder.setNegativeButton("아니오",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                });
-                        builder.show();
+                        Intent intent; intent = new Intent(this, AlertActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
                     }
                 }
 
@@ -311,21 +300,25 @@ public class TService extends Service implements LocationListener{
                         textView.setText("도착하였습니다.");
                         TTS tts = new TTS(mContext, "도착하였습니다");
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        builder.setTitle("도착하였습니다.");
-                        builder.setMessage("화면 종료하시겠습니까?");
-                        builder.setPositiveButton("예",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        ((Activity) mContext).finish();
-                                    }
-                                });
-                        builder.setNegativeButton("아니오",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                });
-                        builder.show();
+//                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                        builder.setTitle("도착하였습니다.");
+//                        builder.setMessage("화면 종료하시겠습니까?");
+//                        builder.setPositiveButton("예",
+//                                new DialogInterface.OnClickListener() {
+//                                    public void onClick(DialogInterface dialog, int which) {
+//                                        ((Activity) mContext).finish();
+//                                    }
+//                                });
+//                        builder.setNegativeButton("아니오",
+//                                new DialogInterface.OnClickListener() {
+//                                    public void onClick(DialogInterface dialog, int which) {
+//                                    }
+//                                });
+//                        builder.show();
+
+                        Intent intent; intent = new Intent(this, AlertActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
                     }
                 }
             }
