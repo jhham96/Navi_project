@@ -283,6 +283,9 @@ public class TService extends Service implements LocationListener{
                     if (mIndex < messageList.size() && pIndex < pointList.size()) {
                         mIndex++;
                         pIndex++;
+
+                        proBar.setProgress(mIndex);
+
                         textView.setText(messageList.get(mIndex));
                         TTS tts = new TTS(mContext, messageList.get(mIndex));
                     } else {
@@ -320,7 +323,7 @@ public class TService extends Service implements LocationListener{
 //        Toast.makeText(mContext, "currentPoint: " + Double.toString(location.getLatitude()) + ", " + Double.toString(location.getLongitude()) + "\n" + "provider: " + location.getProvider(), Toast.LENGTH_SHORT).show();
 //        Log.d("currentpoint: ", Double.toString(getLatitude()) + ", " + Double.toString(getLongitude()));
         }catch (NullPointerException e){
-//            Toast.makeText(mContext, "GPS를 인식할 수 없습니다. 건물 밑에서 나와 주세요.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "GPS를 인식할 수 없습니다. 건물 밑에서 나와 주세요.", Toast.LENGTH_SHORT).show();
         }
     }
 
