@@ -16,6 +16,6 @@ public class TTS implements TextToSpeech.OnInitListener {
     }
 
     public void onInit(int status) {
-        TTS.speak(text, TextToSpeech.QUEUE_ADD, null);
+        TTS.speak(text, TextToSpeech.QUEUE_FLUSH, null);
     }
 }

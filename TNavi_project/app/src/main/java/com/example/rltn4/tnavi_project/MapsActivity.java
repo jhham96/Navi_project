@@ -58,6 +58,8 @@ public class MapsActivity extends AppCompatActivity {
 
     private boolean isCreate = false; // 해당 액티비티가 생성되었는지 확인하는 변수이다.
 
+    private boolean compassMode = false; // compassMode를 위한 변수이다.
+
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name,
                                        IBinder service) {
@@ -105,6 +107,22 @@ public class MapsActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(),CameraActivity.class);
                 startActivity(intent);
 //                finish();
+            }
+        });
+
+        Button compassMode_btn = (Button) findViewById(R.id.compassMode_btn);
+        compassMode_btn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!compassMode) {
+                    compassMode = true;
+                    tMapView.setCompassMode(compassMode);
+                    // 화면 중심을 GPS 로 한다.
+//                    tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
+                } else {
+                    compassMode = false;
+                    tMapView.setCompassMode(compassMode);
+                }
             }
         });
 
@@ -164,6 +182,10 @@ public class MapsActivity extends AppCompatActivity {
                         Toast.makeText(MapsActivity.this, "길안내를 시작합니다.", Toast.LENGTH_SHORT).show();
 
                         isCreate = true;
+
+                        if (!isPermission) {
+                            callPermission();
+                        }
 
                         new Thread() {
                             public void run() {
@@ -468,6 +490,7 @@ public class MapsActivity extends AppCompatActivity {
         if(isCreate) {
             tService.setText(textView);
             tService.setProgressbar(percent_proBar);
+            tService.setProgress();
             textView.setText(tService.getMessage());
         }
     }

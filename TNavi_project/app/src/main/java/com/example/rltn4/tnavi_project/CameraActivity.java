@@ -234,6 +234,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         isCreate = true;
                         tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
                         tService.setProgressbar(percent_proBar);
+                        tService.setProgress();
                         textView.setText(tService.getMessage());
                         tService.setArrowImg(arrow_img);
                     }
