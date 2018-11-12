@@ -181,6 +181,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     public void onClick(DialogInterface dialog, int which) {
                         tService.setText(textView); // TextView를 갱신할 수 있도록 설정한다.
                         tService.setProgressbar(percent_proBar);
+                        tService.setProgress();
                         textView.setText(tService.getMessage());
                     }
                 });

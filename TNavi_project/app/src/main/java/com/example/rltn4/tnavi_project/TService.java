@@ -284,8 +284,11 @@ public class TService extends Service implements LocationListener{
                         mIndex++;
                         pIndex++;
                         textView.setText(messageList.get(mIndex));
+                        TTS tts = new TTS(mContext, messageList.get(mIndex));
                     } else {
                         textView.setText("도착하였습니다.");
+                        TTS tts = new TTS(mContext, "도착하였습니다");
+
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle("도착하였습니다.");
                         builder.setMessage("화면 종료하시겠습니까?");
@@ -360,7 +363,12 @@ public class TService extends Service implements LocationListener{
     public void setProgressbar(ProgressBar percent_proBar){
         proBar = percent_proBar;
         checkpoint_num = messageList.size();
-        proBar.setMax(checkpoint_num);}
+        proBar.setMax(checkpoint_num);
+    }
+
+    public void setProgress() {
+        proBar.setProgress(mIndex);
+    }
 
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
 

@@ -467,6 +467,7 @@ public class MapsActivity extends AppCompatActivity {
         if(isCreate) {
             tService.setText(textView);
             tService.setProgressbar(percent_proBar);
+            tService.setProgress();
             textView.setText(tService.getMessage());
         }
     }
