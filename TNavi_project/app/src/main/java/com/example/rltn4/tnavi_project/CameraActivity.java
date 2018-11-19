@@ -149,7 +149,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_camera);
 
         _Camera_Activity = CameraActivity.this;
@@ -298,10 +298,10 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                         double gyroY = sensorEvent.values[1];
                         double text = 0.0;
 
-                        mLowPassY = lowPass((float)gyroY,mLowPassY);
+//                        mLowPassY = lowPass((float)gyroY,mLowPassY);
                         /* 하이패스 필터*/
-                        mHighPassY = highPass(mLowPassY,mLastY,mHighPassY);
-                        mLastY = mLowPassY;
+                        mHighPassY = highPass((float)gyroY,mLastY,mHighPassY);
+                        mLastY = (float)gyroY;
 
                         /* 단위시간 계산 */
                         dt = (sensorEvent.timestamp - timestamp) * NS2S;
@@ -309,7 +309,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                         /* 시간이 변화했으면 */
                         if (dt - timestamp * NS2S != 0) {
-                            pitch = pitch + gyroY * dt;
+                            pitch = pitch + mHighPassY * dt;
                             text = -(pitch * rad_to_dgr) % 360; // 자이로는 반시계로 돌릴 때 값이 양수로 증가, 시계는 음수로 증가, 나침반이라 반대라서 부호 바꿔줌
 
                             first_x.setText(String.format("%f",firstMagn));
@@ -324,6 +324,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             ArrayList<TMapPoint> pointList = tService.getPointList();
                             if(isCreate) {
                                 dest_degree = destiny_angle(tService.getPointList().get(tService.getPointList().size() - 1).getLatitude(), tService.getPointList().get(pointList.size() - 1).getLongitude());
+                                Log.d("degree3",String.format("%f",dest_degree));
                                 nearest_building_index = nearest_building();
                                 if(nearest_building_index >= 0) {
                                     building_degree = destiny_angle(list.get(nearest_building_index).getLat(), list.get(nearest_building_index).getLon());
@@ -349,6 +350,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                                     } else {
                                         building_text.setText("");
                                     }
+                                }
+                                else{
+                                    building_text.setText("");
                                 }
 
                                 /* 목적지 팔로잉 */
@@ -429,16 +433,16 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 /(Math.sqrt(Math.pow(vector_Latitude, 2) + Math.pow(vector_Longitude, 2)) * Math.sqrt(Math.pow(vector_standard_latitude, 2) + Math.pow(vector_standard_longitude, 2)))) * 57.2958);
 
         if( my_latitude < dest_latitude && my_longitude < dest_longitude ){ // 1사분면
-
+            angle = 90 - Math.abs(angle);
         }
         else if( my_latitude < dest_latitude && my_longitude > dest_longitude){ // 2사분면
-            angle = 270 + angle;
+            angle = 270 + Math.abs(angle);
         }
         else if( my_latitude > dest_latitude && my_longitude > dest_longitude){ // 3사분면
-            angle = 270 - angle;
+            angle = 270 - Math.abs(angle);
         }
         else{ // 4사분면
-            angle = 90 + angle;
+            angle = 90 + Math.abs(angle);
         }
         // 특정 각도가 넘는지를 확인한다.
         return Math.abs(angle);
@@ -449,7 +453,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     }
 
     float highPass(float current, float last, float filtered){
-        return (float)(0.1*(filtered+current-last));
+        return (float)(1*(filtered+current-last));
     }
     private void complementary(double new_ts){
         /* 자이로랑 가속 해제 */

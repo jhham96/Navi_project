@@ -116,21 +116,21 @@ public class MapsActivity extends AppCompatActivity {
             }
         });
 
-        Button compassMode_btn = (Button) findViewById(R.id.compassMode_btn);
-        compassMode_btn.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!compassMode) {
-                    compassMode = true;
-                    tMapView.setCompassMode(compassMode);
-                    // 화면 중심을 GPS 로 한다.
-//                    tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
-                } else {
-                    compassMode = false;
-                    tMapView.setCompassMode(compassMode);
-                }
-            }
-        });
+//        Button compassMode_btn = (Button) findViewById(R.id.compassMode_btn);
+//        compassMode_btn.setOnClickListener(new Button.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(!compassMode) {
+//                    compassMode = true;
+//                    tMapView.setCompassMode(compassMode);
+//                    // 화면 중심을 GPS 로 한다.
+////                    tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
+//                } else {
+//                    compassMode = false;
+//                    tMapView.setCompassMode(compassMode);
+//                }
+//            }
+//        });
 
         textView = (TextView) findViewById(R.id.textView);
 
