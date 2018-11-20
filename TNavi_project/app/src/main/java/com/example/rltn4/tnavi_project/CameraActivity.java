@@ -125,6 +125,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
     public static Activity _Camera_Activity;
 
+    private Button dest_following_btn;
+    private boolean dest_following_onoff = true;
+
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name,
                                        IBinder service) {
@@ -188,6 +191,16 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             }
         });
 
+        dest_following_btn = (Button)findViewById(R.id.dest_following_btn);
+        dest_following_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(dest_following_onoff == true)
+                    dest_following_onoff = false;
+                else
+                    dest_following_onoff = true;
+            }
+        });
         final TextView textView = findViewById(R.id.text);
 
         // 데이터 읽어오기
@@ -355,28 +368,30 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                                     building_text.setText("");
                                 }
 
+                                if(dest_following_onoff == true) {
                                 /* 목적지 팔로잉 */
-                                if (dest_degree >= 10 && dest_degree < 350 && handling_x >= (dest_degree - 10.0) && handling_x <= (dest_degree + 10.0)) { // 목적지가 10~350
-                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
-                                    destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0));
-                                }
-                                else if (dest_degree < 10.0 && (handling_x < (dest_degree +10.0) || handling_x > ( 360 - dest_degree))){ // 0~10
-                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
-                                    if(handling_x < 350){
-                                        destination_img.setX((float) (width - (width * (handling_x - (dest_degree - 10.0)) / 20.0)));
-                                    }else{
-                                        destination_img.setX((float) (width - (width * (handling_x - (360-dest_degree)) / 20.0)));
-                                    }
-                                }
-                                else if(dest_degree >= 350.0 && ((handling_x >= (dest_degree - 10.0) || handling_x < (10.0+ dest_degree)%360))){ // 350~360
-                                    destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
-                                    if(handling_x >= (dest_degree - 10.0)){
+                                    if (dest_degree >= 10 && dest_degree < 350 && handling_x >= (dest_degree - 10.0) && handling_x <= (dest_degree + 10.0)) { // 목적지가 10~350
+                                        destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
                                         destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0));
-                                    }else{
-                                        destination_img.setX((float) (width * (((10.0 + dest_degree)%360-handling_x)) / 20.0));
+                                    } else if (dest_degree < 10.0 && (handling_x < (dest_degree + 10.0) || handling_x > (360 - dest_degree))) { // 0~10
+                                        destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                        if (handling_x < 350) {
+                                            destination_img.setX((float) (width - (width * (handling_x - (dest_degree - 10.0)) / 20.0)));
+                                        } else {
+                                            destination_img.setX((float) (width - (width * (handling_x - (360 - dest_degree)) / 20.0)));
+                                        }
+                                    } else if (dest_degree >= 350.0 && ((handling_x >= (dest_degree - 10.0) || handling_x < (10.0 + dest_degree) % 360))) { // 350~360
+                                        destination_img.setImageDrawable(getResources().getDrawable(R.drawable.flag));
+                                        if (handling_x >= (dest_degree - 10.0)) {
+                                            destination_img.setX((float) (width - width * (handling_x - (dest_degree - 10.0)) / 20.0));
+                                        } else {
+                                            destination_img.setX((float) (width * (((10.0 + dest_degree) % 360 - handling_x)) / 20.0));
+                                        }
+                                    } else {
+                                        destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
                                     }
                                 }
-                                else {
+                                else{
                                     destination_img.setImageDrawable(getResources().getDrawable(R.drawable.blank));
                                 }
                             }
@@ -408,9 +423,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 min_dist = currnet_dist;
             }
         }
-//        if(min_dist > 7){
-//            index = -1;
-//        }
+        if(min_dist > 10){
+            index = -1;
+        }
 
         return index;
     }
