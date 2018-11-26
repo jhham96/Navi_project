@@ -152,7 +152,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_camera);
 
         _Camera_Activity = CameraActivity.this;
@@ -313,8 +313,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
 //                        mLowPassY = lowPass((float)gyroY,mLowPassY);
                         /* 하이패스 필터*/
-                        mHighPassY = highPass((float)gyroY,mLastY,mHighPassY);
-                        mLastY = (float)gyroY;
+//                        mHighPassY = highPass((float)gyroY,mLastY,mHighPassY);
+//                        mLastY = (float)gyroY;
 
                         /* 단위시간 계산 */
                         dt = (sensorEvent.timestamp - timestamp) * NS2S;
@@ -322,7 +322,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                         /* 시간이 변화했으면 */
                         if (dt - timestamp * NS2S != 0) {
-                            pitch = pitch + mHighPassY * dt;
+                            pitch = pitch + gyroY * dt;
                             text = -(pitch * rad_to_dgr) % 360; // 자이로는 반시계로 돌릴 때 값이 양수로 증가, 시계는 음수로 증가, 나침반이라 반대라서 부호 바꿔줌
 
                             first_x.setText(String.format("%f",firstMagn));
@@ -423,7 +423,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 min_dist = currnet_dist;
             }
         }
-        if(min_dist > 20){
+        if(min_dist > 30){
             index = -1;
         }
 
