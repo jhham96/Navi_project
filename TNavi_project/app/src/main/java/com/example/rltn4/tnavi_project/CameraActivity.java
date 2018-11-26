@@ -152,7 +152,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_camera);
 
         _Camera_Activity = CameraActivity.this;
@@ -423,7 +423,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 min_dist = currnet_dist;
             }
         }
-        if(min_dist > 10){
+        if(min_dist > 20){
             index = -1;
         }
 
