@@ -94,7 +94,7 @@ public class MapsActivity extends AppCompatActivity {
         tMapView = new TMapView(this);
 
         tMapView.setSKTMapApiKey("f51c315c-f7e2-42f9-b290-0d2f818c07d7");
-        tMapView.setCompassMode(true); // 단말의 방향에 따라 지도를 움직인다.
+        tMapView.setCompassMode(false); // 단말의 방향에 따라 지도를 움직인다.
 //        tMapView.setTrackingMode(true); // 화면 중심을 단말의 현재 위치로 이동시킨다.
         tMapView.setMarkerRotate(true); // 나침반 회전 시 Marker 이미지를 같이 회전시킨다.
         tMapView.setZoomLevel(18);
@@ -123,13 +123,13 @@ public class MapsActivity extends AppCompatActivity {
                 if(!compassMode) {
                     compassMode = true;
                     tMapView.setCompassMode(compassMode);
-                    compassMode_btn.setText("ON");
+                    compassMode_btn.setText("나침반" + "\n" +"ON");
                     // 화면 중심을 GPS 로 한다.
 //                    tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
                 } else {
                     compassMode = false;
                     tMapView.setCompassMode(compassMode);
-                    compassMode_btn.setText("OFF");
+                    compassMode_btn.setText("나침반"+"\n"+"OFF");
                 }
             }
         });

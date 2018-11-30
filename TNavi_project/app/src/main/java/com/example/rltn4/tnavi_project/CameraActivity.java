@@ -195,16 +195,18 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         });
 
         dest_following_btn = (Button)findViewById(R.id.dest_following_btn);
+        dest_following_btn.setText("깃발"+"\n"+"ON");
+
         dest_following_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(dest_following_onoff == true) {
                     dest_following_onoff = false;
-                    dest_following_btn.setText("OFF");
+                    dest_following_btn.setText("깃발"+"\n"+"OFF");
                 }
                 else {
                     dest_following_onoff = true;
-                    dest_following_btn.setText("ON");
+                    dest_following_btn.setText("깃발"+"\n"+"ON");
                 }
             }
         });

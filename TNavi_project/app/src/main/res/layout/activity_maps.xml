@@ -75,7 +75,7 @@
             android:layout_marginTop="1dp"
             android:layout_weight="3"
             android:background="@drawable/rounded"
-            android:text="on/off"
+            android:text="나침반 OFF"
             android:textColor="@android:color/background_light"
             android:textSize="18dp" />
 
