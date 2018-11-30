@@ -108,13 +108,13 @@ public class MainActivity extends AppCompatActivity {
 
                 // 빈칸 예외처리(출발지, 도착지 모두 필요 (구현완료)
                 if (start.getText().toString().equals("") || finish.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "출발지, 도착지를 지정해주세요", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "출발지, 도착지를 지정해 주세요", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 // 빈칸 예외처리(출발지, 도착지 모두 필요 (구현완료)
                     if (start.getText().toString().equals(finish.getText().toString())) {
-                        Toast.makeText(getApplicationContext(), "출발지, 도착지가 같습니다. 다시 지정해주세요", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "출발지, 도착지가 같습니다. 다시 지정해 주세요", Toast.LENGTH_SHORT).show();
                         return;
                 }
 

@@ -91,7 +91,7 @@ public class TService extends Service implements LocationListener{
     @Override
     public void onCreate() {
         super.onCreate();
-        Toast.makeText(getApplicationContext(), "Service Created", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "Service Created", Toast.LENGTH_SHORT).show();
         activity_flag = true;
         pIndex = 1;
         mIndex = 0;
