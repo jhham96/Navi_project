@@ -19,7 +19,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -152,7 +154,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_camera);
 
         _Camera_Activity = CameraActivity.this;
@@ -202,7 +204,14 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             }
         });
         final TextView textView = findViewById(R.id.text);
+        textView.setOnClickListener(new View.OnClickListener(){
 
+            @Override
+            public void onClick(View v) {
+                changeArrow(arrow_img,textView);
+            }
+        });
+        
         // 데이터 읽어오기
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -313,8 +322,8 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
 //                        mLowPassY = lowPass((float)gyroY,mLowPassY);
                         /* 하이패스 필터*/
-                        mHighPassY = highPass((float)gyroY,mLastY,mHighPassY);
-                        mLastY = (float)gyroY;
+//                        mHighPassY = highPass((float)gyroY,mLastY,mHighPassY);
+//                        mLastY = (float)gyroY;
 
                         /* 단위시간 계산 */
                         dt = (sensorEvent.timestamp - timestamp) * NS2S;
@@ -322,7 +331,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 
                         /* 시간이 변화했으면 */
                         if (dt - timestamp * NS2S != 0) {
-                            pitch = pitch + mHighPassY * dt;
+                            pitch = pitch + gyroY * dt;
                             text = -(pitch * rad_to_dgr) % 360; // 자이로는 반시계로 돌릴 때 값이 양수로 증가, 시계는 음수로 증가, 나침반이라 반대라서 부호 바꿔줌
 
                             first_x.setText(String.format("%f",firstMagn));
@@ -423,7 +432,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 min_dist = currnet_dist;
             }
         }
-        if(min_dist > 20){
+        if(min_dist > 30){
             index = -1;
         }
 
@@ -542,6 +551,32 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
 
     }
+
+    void changeArrow(ImageView arrowView, TextView text_msg) {
+        String msg = (String) text_msg.getText();
+        if (msg.indexOf("1시") >= 0) {
+            arrowView.setImageResource(R.drawable.t1);
+        } else if (msg.indexOf("3시") >= 0) {
+            arrowView.setImageResource(R.drawable.t3);
+        } else if (msg.indexOf("5시") >= 0) {
+            arrowView.setImageResource(R.drawable.t5);
+        } else if (msg.indexOf("7시") >= 0) {
+            arrowView.setImageResource(R.drawable.t7);
+        } else if (msg.indexOf("9시") >= 0) {
+            arrowView.setImageResource(R.drawable.t9);
+        } else if (msg.indexOf("11시") >= 0) {
+            arrowView.setImageResource(R.drawable.t11);
+        } else {
+            arrowView.setImageResource(R.drawable.uparrow);
+        }
+        Handler handler = new Handler(){
+            public void handleMessage(Message msg){
+                arrow_img.setImageResource(R.drawable.blank);
+            }
+        };
+        handler.sendEmptyMessageDelayed(0,3000); // 3초 딜레이
+    }
+
 
     private boolean checkCAMERAPermission(){
         int result = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.CAMERA);
