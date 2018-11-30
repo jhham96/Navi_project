@@ -1,3 +1,4 @@
+
 package com.example.rltn4.tnavi_project;
 
 import android.annotation.TargetApi;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
@@ -444,6 +446,8 @@ public class TService extends Service implements LocationListener{
                 arrow_img.setImageResource(R.drawable.blank);
             }
         };
+        final Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(1000);
         handler.sendEmptyMessageDelayed(0,3000); // 3초 딜레이
     }
 
