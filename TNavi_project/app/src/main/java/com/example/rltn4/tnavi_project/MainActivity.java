@@ -112,6 +112,12 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
+                // 빈칸 예외처리(출발지, 도착지 모두 필요 (구현완료)
+                    if (start.getText().toString().equals(finish.getText().toString())) {
+                        Toast.makeText(getApplicationContext(), "출발지, 도착지가 같습니다. 다시 지정해주세요", Toast.LENGTH_SHORT).show();
+                        return;
+                }
+
                 // 중복체크 (구현완료)
                 /* 1. listview에서 데이터를 가져옴.
                  *  2. 하나씩 비교
