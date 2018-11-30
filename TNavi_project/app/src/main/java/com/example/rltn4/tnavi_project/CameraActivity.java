@@ -198,10 +198,14 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         dest_following_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(dest_following_onoff == true)
+                if(dest_following_onoff == true) {
                     dest_following_onoff = false;
-                else
+                    dest_following_btn.setText("OFF");
+                }
+                else {
                     dest_following_onoff = true;
+                    dest_following_btn.setText("ON");
+                }
             }
         });
         final TextView textView = findViewById(R.id.text);

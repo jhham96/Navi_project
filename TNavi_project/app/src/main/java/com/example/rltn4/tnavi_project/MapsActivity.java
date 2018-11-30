@@ -116,18 +116,20 @@ public class MapsActivity extends AppCompatActivity {
             }
         });
 
-        Button compassMode_btn = (Button) findViewById(R.id.compassMode_btn);
+        final Button compassMode_btn = (Button) findViewById(R.id.compassMode_btn);
         compassMode_btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(!compassMode) {
                     compassMode = true;
                     tMapView.setCompassMode(compassMode);
+                    compassMode_btn.setText("ON");
                     // 화면 중심을 GPS 로 한다.
 //                    tMapView.setCenterPoint(tService.getLongitude(), tService.getLatitude());
                 } else {
                     compassMode = false;
                     tMapView.setCompassMode(compassMode);
+                    compassMode_btn.setText("OFF");
                 }
             }
         });
