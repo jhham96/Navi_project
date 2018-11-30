@@ -112,17 +112,10 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-<<<<<<< HEAD
                 // 빈칸 예외처리(출발지, 도착지 모두 필요 (구현완료)
-                    if (start.getText().toString().equals(finish.getText().toString())) {
-                        Toast.makeText(getApplicationContext(), "출발지, 도착지가 같습니다. 다시 지정해 주세요", Toast.LENGTH_SHORT).show();
-                        return;
-=======
-                // 출발지, 도착지 같음 예외처리(구현완료)
                 if (start.getText().toString().equals(finish.getText().toString())) {
-                    Toast.makeText(getApplicationContext(), "출발지, 도착지가 같습니다. 다시 지정해 주세요.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "출발지, 도착지가 같습니다. 다시 지정해 주세요", Toast.LENGTH_SHORT).show();
                     return;
->>>>>>> 077a51ca569072c8c84d2d611dad792368612a24
                 }
 
                 // 중복체크 (구현완료)

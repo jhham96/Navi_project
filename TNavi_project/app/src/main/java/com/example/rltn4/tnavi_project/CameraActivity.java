@@ -335,14 +335,14 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                             pitch = pitch + gyroY * dt;
                             text = -(pitch * rad_to_dgr) % 360; // 자이로는 반시계로 돌릴 때 값이 양수로 증가, 시계는 음수로 증가, 나침반이라 반대라서 부호 바꿔줌
 
-//                            first_x.setText(String.format("%f",firstMagn));
+                            first_x.setText(String.format("%f",firstMagn));
 
                             handling_x = text+firstMagn;
                             if(handling_x < 0){
                                 handling_x = 360 + handling_x;
                             }
                             handling_x = handling_x%360; // handling_x = 핸드폰 들고 나침반 각도
-//                            pitch_text.setText(String.format("%f",handling_x));
+                            pitch_text.setText(String.format("%f",handling_x));
 
                             ArrayList<TMapPoint> pointList = tService.getPointList();
                             if(isCreate) {
@@ -433,7 +433,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                 min_dist = currnet_dist;
             }
         }
-        if(min_dist > 30){
+        if(min_dist > 50){
             index = -1;
         }
 
