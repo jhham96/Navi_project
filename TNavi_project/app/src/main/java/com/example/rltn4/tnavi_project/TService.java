@@ -427,7 +427,12 @@ public class TService extends Service implements LocationListener{
     void changeArrow(ImageView arrowView, TextView text_msg) {
         String msg = (String) text_msg.getText();
         if (msg.indexOf("1시") >= 0) {
-            arrowView.setImageResource(R.drawable.t1);
+            if (msg.indexOf("11시") >= 0){
+                arrowView.setImageResource(R.drawable.t11);
+            }
+            else {
+                arrowView.setImageResource(R.drawable.t1);
+            }
         } else if (msg.indexOf("3시") >= 0) {
             arrowView.setImageResource(R.drawable.t3);
         } else if (msg.indexOf("5시") >= 0) {
@@ -436,8 +441,6 @@ public class TService extends Service implements LocationListener{
             arrowView.setImageResource(R.drawable.t7);
         } else if (msg.indexOf("9시") >= 0) {
             arrowView.setImageResource(R.drawable.t9);
-        } else if (msg.indexOf("11시") >= 0) {
-            arrowView.setImageResource(R.drawable.t11);
         } else {
             arrowView.setImageResource(R.drawable.uparrow);
         }

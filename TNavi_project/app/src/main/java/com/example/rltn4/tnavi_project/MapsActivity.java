@@ -296,6 +296,10 @@ public class MapsActivity extends AppCompatActivity {
                                         end = new TMapPoint(37.506054, 126.958447);
                                     }
 
+                                    if(listViewItem.gettMapBoxStart().getName().toString().equals("중앙대학교 공과대학")) {
+                                        start = new TMapPoint(37.503831, 126.957522);
+                                    }
+
                                     // 지도 위에 선을 나타내는 구현이다.
 //                    TMapPolyLine tMapPolyLine = tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH, start.getPOIPoint(), end.getPOIPoint());
                                     TMapPolyLine tMapPolyLine = tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH, start, end);

@@ -129,7 +129,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     public static Activity _Camera_Activity;
 
     private Button dest_following_btn;
-    private boolean dest_following_onoff = true;
+    private boolean dest_following_onoff = false;
 
     private ServiceConnection conn = new ServiceConnection() {
         public void onServiceConnected(ComponentName name,
@@ -195,7 +195,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         });
 
         dest_following_btn = (Button)findViewById(R.id.dest_following_btn);
-        dest_following_btn.setText("깃발"+"\n"+"ON");
+        dest_following_btn.setText("깃발"+"\n"+"OFF");
 
         dest_following_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -562,7 +562,12 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     void changeArrow(ImageView arrowView, TextView text_msg) {
         String msg = (String) text_msg.getText();
         if (msg.indexOf("1시") >= 0) {
-            arrowView.setImageResource(R.drawable.t1);
+            if (msg.indexOf("11시") >= 0){
+                arrowView.setImageResource(R.drawable.t11);
+            }
+            else {
+                arrowView.setImageResource(R.drawable.t1);
+            }
         } else if (msg.indexOf("3시") >= 0) {
             arrowView.setImageResource(R.drawable.t3);
         } else if (msg.indexOf("5시") >= 0) {
@@ -571,8 +576,6 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             arrowView.setImageResource(R.drawable.t7);
         } else if (msg.indexOf("9시") >= 0) {
             arrowView.setImageResource(R.drawable.t9);
-        } else if (msg.indexOf("11시") >= 0) {
-            arrowView.setImageResource(R.drawable.t11);
         } else {
             arrowView.setImageResource(R.drawable.uparrow);
         }
